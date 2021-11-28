@@ -95,4 +95,39 @@ export default class Board {
 
         return true;
     }
+
+    /**
+     * @param {Piece} piece
+     * @param {Coord} pos
+     */
+    place(piece, pos) {
+        const i = (pos[1] * BOARD_SIZE) + pos[0];
+        if (this.#squares[i] != undefined) {
+            throw new Error(`Existing piece at [${pos}]`);
+        }
+
+        this.#squares[i] = piece;
+    }
+
+    /**
+     * @param {Coord} pos
+     */
+    remove(pos) {
+        this.#squares[(pos[1] * BOARD_SIZE) + pos[0]] = undefined;
+    }
+
+    /**
+     * @param {Coord} from
+     * @param {Coord} to
+     */
+    move(from, to) {
+        const piece = this.get(from);
+        if (piece == undefined) {
+            throw new Error(`No piece at [${from}]`);
+        }
+
+        this.remove(from);
+        this.place(piece, to);
+        piece.hasMoved = true;
+    }
 }

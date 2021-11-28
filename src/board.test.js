@@ -59,3 +59,42 @@ test("clearLineOfSight returns false when one or more intermediate square is not
     t.false(board.clearLineOfSight([4, 1], [4, 7]));
     t.false(board.clearLineOfSight([3, 7], [6, 7]));
 });
+
+test("place adds piece to square", t => {
+    const board = new Board();
+    const piece = { colour: Colour.WHITE, type: PieceType.PAWN, hasMoved: false };
+    board.place(piece, [6, 4]);
+    t.is(board.get([6, 4]), piece);
+});
+
+test("place throws error when square is already occupied", t => {
+    const board = new Board();
+    const piece = { colour: Colour.WHITE, type: PieceType.PAWN, hasMoved: false };
+    t.throws(() => board.place(piece, [0, 1]), { message: "Existing piece at [0,1]" });
+});
+
+test("remove clears piece from square", t => {
+    const board = new Board();
+    board.remove([0, 1]);
+    t.is(board.get([0, 1]), undefined);
+});
+
+test("move clears piece from origin square and adds it to destination square", t => {
+    const board = new Board();
+    const piece = board.get([5, 6]);
+    board.move([5, 6], [5, 4]);
+
+    t.true(piece?.hasMoved);
+    t.is(board.get([5, 4]), piece);
+    t.is(board.get([5, 6]), undefined);
+});
+
+test("move throws error when origin square is empty", t => {
+    const board = new Board();
+    t.throws(() => board.move([3, 4], [5, 2]), { message: "No piece at [3,4]" });
+});
+
+test("move throws error when desination square is occupied", t => {
+    const board = new Board();
+    t.throws(() => board.move([2, 7], [3, 6]), { message: "Existing piece at [3,6]" });
+});
