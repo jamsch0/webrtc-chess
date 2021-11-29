@@ -7,7 +7,7 @@
     "type": "module",
     "scripts": {
         "start": "serve",
-        "test": "ava"
+        "test": "ava --timeout 10s"
     },
     "devDependencies": {
         "ava": "^4.0.0-rc.1",

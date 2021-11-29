@@ -37,6 +37,11 @@ test("is created with correct pieces", t => {
     t.is(blackPieces.filter(piece => piece.type === PieceType.PAWN).length, 8);
 });
 
+test("clearLineOfSight returns true when origin and target square are the same", t => {
+    const board = new Board();
+    t.true(board.clearLineOfSight([5, 5], [5, 5]));
+});
+
 test("clearLineOfSight returns false for squares not on the same rank, file, or diagonal", t => {
     const board = new Board();
     t.false(board.clearLineOfSight([2, 3], [5, 5]));

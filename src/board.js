@@ -78,6 +78,9 @@ export default class Board {
         const fileDiff = to[0] - from[0];
         const rankDiff = to[1] - from[1];
 
+        if (fileDiff === 0 && rankDiff === 0) {
+            return true;
+        }
         if (fileDiff !== 0 && rankDiff !== 0 && Math.abs(fileDiff) !== Math.abs(rankDiff)) {
             // Not horizontal, vertical, nor diagonal
             return false;
