@@ -1,21 +1,36 @@
-name: CI
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+name: CI/CD Workflow
+on: [push, pull_request]
 
 jobs:
-  build:
-
+  test:
+    name: Test
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
+
     - name: Use Node.js
       uses: actions/setup-node@v2
       with:
         node-version: '16'
-    - run: yarn install
-    - run: yarn test
+
+    - name: Test
+      run: |
+        yarn install
+        yarn test
+
+  deploy:
+    name: Deploy
+    needs: test
+    runs-on: ubuntu-latest
+    if: ${{github.event_name == 'push' && github.ref == 'refs/heads/main'}}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Deploy
+      uses: JamesIves/github-pages-deploy-action@4.1.7
+      with:
+        branch: gh-pages
+        folder: .
