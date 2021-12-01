@@ -1,0 +1,16 @@
+{
+    "name": "webrtc-chess",
+    "version": "0.0.0",
+    "main": "main.js",
+    "author": "James Chapman <jchapman3000@gmail.com>",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "start": "serve",
+        "test": "ava --timeout 10s"
+    },
+    "devDependencies": {
+        "ava": "^4.0.0-rc.1",
+        "serve": "^13.0.2"
+    }
+}
