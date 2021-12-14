@@ -6,10 +6,10 @@
     <title>WebRTC Chess</title>
 
     <script type="module">
-        import Board from "./src/board.js";
+        import Game from "./src/game.js";
 
-        const board = new Board();
-        console.log(JSON.stringify(board.squares));
+        const game = new Game();
+        console.log(game.toJSON());
     </script>
 </head>
 <body>

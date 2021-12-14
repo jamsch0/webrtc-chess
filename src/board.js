@@ -14,7 +14,7 @@ const BOARD_SIZE = 8;
  * Files (columns) are indexed left-to-right, and ranks (rows) front-to-back
  * (or bottom-to-top when viewed from above), from White's perspective.
  *
- * The board is initialised ready for play with pieces placed in their initial
+ * The board is initialised ready for play with pieces placed in their starting
  * positions.
  *
  * White starts on the first two ranks, and Black on the last two.
@@ -102,6 +102,7 @@ export default class Board {
     /**
      * @param {Piece} piece
      * @param {Coord} pos
+     * @returns {void}
      */
     place(piece, pos) {
         const i = (pos[1] * BOARD_SIZE) + pos[0];
@@ -114,6 +115,7 @@ export default class Board {
 
     /**
      * @param {Coord} pos
+     * @returns {void}
      */
     remove(pos) {
         this.#squares[(pos[1] * BOARD_SIZE) + pos[0]] = undefined;
@@ -122,6 +124,7 @@ export default class Board {
     /**
      * @param {Coord} from
      * @param {Coord} to
+     * @returns {void}
      */
     move(from, to) {
         const piece = this.get(from);
