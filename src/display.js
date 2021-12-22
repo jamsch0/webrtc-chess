@@ -46,7 +46,7 @@ export default class Display {
             const y = Math.floor(index / BOARD_SIZE);
             const coord = /** @type {Coord} */ ([x, y]);
 
-            const colour = (index + y) % 2 === 0 ? 'white' : 'black';
+            const colour = (index + y) % 2 === 0 ? 'black' : 'white';
             square.classList.add('square', colour);
 
             const piece = board.get(coord);
