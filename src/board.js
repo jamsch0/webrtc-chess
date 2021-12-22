@@ -3,7 +3,7 @@ import { range, repeat, zip } from "./iter.js";
 
 /** @typedef {import("./piece.js").Piece} Piece */
 
-const BOARD_SIZE = 8;
+export const BOARD_SIZE = 8;
 
 /** @typedef {0 | 1 | 2 | 3 | 4 | 5 | 6 | 7} CoordElem */
 /** @typedef {readonly [CoordElem, CoordElem]} Coord */

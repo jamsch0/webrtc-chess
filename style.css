@@ -1,0 +1,69 @@
+:root {
+    --col-primary-dark:    hsl(26, 30%, 40%);
+    --col-primary-darker:  hsl(26, 10%, 20%);
+    --col-primary-light:   hsl(26, 70%, 90%);
+    --col-primary-lighter: hsl(26, 80%, 96%);
+}
+
+body {
+    background-color: var(--col-primary-darker);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+}
+
+#lobby {
+    display: none;
+}
+
+#game {
+    display: block;
+}
+
+#game-board {
+    display: grid;
+    max-width: 100vh;
+    margin: 0 auto;
+    direction: rtl;
+}
+
+#game-board .square {
+    display: flex;
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 100%;
+    direction: ltr;
+    cursor: pointer;
+    user-select: none;
+}
+
+#game-board .square.black {
+    background-color: var(--col-primary-dark);
+    color: var(--col-primary-lighter);
+}
+
+#game-board .square.white {
+    background-color: var(--col-primary-light);
+    color: var(--col-primary-darker);
+}
+
+#game-board .square-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    font-size: 2.5vmin;
+    font-weight: 700;
+    font-family: Arial, Helvetica, sans-serif;
+}

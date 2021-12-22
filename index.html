@@ -4,15 +4,24 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebRTC Chess</title>
+    <link rel="stylesheet" href="style.css">
 
     <script type="module">
         import Game from "./src/game.js";
+        import Display from "./src/display.js";
 
         const game = new Game();
         console.log(game.toJSON());
+
+        const display = new Display(game.board);
     </script>
 </head>
 <body>
-    <h1>WebRTC Chess</h1>
+    <div id="lobby">
+        <h1>WebRTC Chess</h1>
+    </div>
+    <div id="game">
+        <div id="game-board"></div>
+    </div>
 </body>
 </html>
