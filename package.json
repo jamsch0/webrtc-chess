@@ -10,7 +10,7 @@
         "test": "ava --timeout 10s"
     },
     "devDependencies": {
-        "ava": "^4.0.0",
+        "ava": "^4.0.1",
         "serve": "^13.0.2"
     }
 }
