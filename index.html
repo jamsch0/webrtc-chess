@@ -7,13 +7,33 @@
     <link rel="stylesheet" href="style.css">
 
     <script type="module">
-        import Game from "./src/game.js";
+        import Session from "./src/session.js";
         import Display from "./src/display.js";
 
-        const game = new Game();
-        console.log(game.toJSON());
+        const connection1 = new RTCPeerConnection();
+        const connection2 = new RTCPeerConnection();
 
-        const display = new Display(game.board);
+        document.addEventListener("DOMContentLoaded", async () => {
+            connection1.addEventListener("icecandidate", event => connection2.addIceCandidate(event.candidate));
+            connection2.addEventListener("icecandidate", event => connection1.addIceCandidate(event.candidate));
+
+            const offer = await connection1.createOffer();
+            await connection1.setLocalDescription(offer);
+            await connection2.setRemoteDescription(offer);
+
+            const answer = await connection2.createAnswer();
+            await connection2.setLocalDescription(answer);
+            await connection1.setRemoteDescription(answer);
+        });
+
+        connection2.addEventListener("datachannel", event => globalThis.channel = event.channel, { once: true });
+
+        const channel = connection1.createDataChannel("messages");
+        const session = new Session(channel, "black");
+        const display = new Display();
+
+        display.render(session.game.board);
+        channel.addEventListener("message", () => setTimeout(() => display.render(session.game.board)));
     </script>
 </head>
 <body>
