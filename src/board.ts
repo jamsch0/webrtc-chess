@@ -1,12 +1,10 @@
-import { Colour, PieceType } from "./piece.js";
+import { Colour, Piece, PieceType } from "./piece.js";
 import { range, repeat, zip } from "./iter.js";
-
-/** @typedef {import("./piece.js").Piece} Piece */
 
 export const BOARD_SIZE = 8;
 
-/** @typedef {0 | 1 | 2 | 3 | 4 | 5 | 6 | 7} CoordElem */
-/** @typedef {readonly [CoordElem, CoordElem]} Coord */
+type CoordElem = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
+export type Coord = readonly [CoordElem, CoordElem];
 
 /**
  * A chess board.
@@ -20,10 +18,8 @@ export const BOARD_SIZE = 8;
  * White starts on the first two ranks, and Black on the last two.
  */
 export default class Board {
-    /** @type {(Piece | undefined)[]} */
-    #squares;
+    #squares: (Piece | undefined)[];
 
-    /** @type {readonly (Readonly<Piece> | undefined)[]} */
     get squares() {
         return this.#squares;
     }
@@ -60,21 +56,14 @@ export default class Board {
         }
     }
 
-    /**
-     * @param {Coord} pos
-     * @returns {Piece | undefined}
-     */
-    get(pos) {
+    get(pos: Coord): Piece | undefined {
         return this.#squares[(pos[1] * BOARD_SIZE) + pos[0]];
     }
 
     /**
      * Checks if every square in a straight line between from and to (exclusive) is empty.
-     * @param {Coord} from
-     * @param {Coord} to
-     * @returns {boolean}
      */
-    clearLineOfSight(from, to) {
+    clearLineOfSight(from: Coord, to: Coord): boolean {
         const fileDiff = to[0] - from[0];
         const rankDiff = to[1] - from[1];
 
@@ -90,7 +79,7 @@ export default class Board {
         const rankIter = rankDiff !== 0 ? range(from[1] + Math.sign(rankDiff), to[1]) : repeat(from[1]);
 
         for (const [file, rank] of zip(fileIter, rankIter)) {
-            const pos = /** @type {Coord} */ ([file, rank]);
+            const pos = [file, rank] as Coord;
             if (this.get(pos) != undefined) {
                 return false;
             }
@@ -99,12 +88,7 @@ export default class Board {
         return true;
     }
 
-    /**
-     * @param {Piece} piece
-     * @param {Coord} pos
-     * @returns {void}
-     */
-    place(piece, pos) {
+    place(piece: Piece, pos: Coord): void {
         const i = (pos[1] * BOARD_SIZE) + pos[0];
         if (this.#squares[i] != undefined) {
             throw new Error(`Existing piece at [${pos}]`);
@@ -113,20 +97,11 @@ export default class Board {
         this.#squares[i] = piece;
     }
 
-    /**
-     * @param {Coord} pos
-     * @returns {void}
-     */
-    remove(pos) {
+    remove(pos: Coord): void {
         this.#squares[(pos[1] * BOARD_SIZE) + pos[0]] = undefined;
     }
 
-    /**
-     * @param {Coord} from
-     * @param {Coord} to
-     * @returns {void}
-     */
-    move(from, to) {
+    move(from: Coord, to: Coord): void {
         const piece = this.get(from);
         if (piece == undefined) {
             throw new Error(`No piece at [${from}]`);

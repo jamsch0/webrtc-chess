@@ -1,8 +1,6 @@
 import test from "ava";
 import Board from "./board.js";
-import { Colour, PieceType } from "./piece.js";
-
-/** @typedef {import("./board.js").Piece} Piece */
+import { Colour, Piece, PieceType } from "./piece.js";
 
 test("is created with correct number of squares", t => {
     const board = new Board();
@@ -12,7 +10,7 @@ test("is created with correct number of squares", t => {
 test("is created with correct pieces", t => {
     const board = new Board();
 
-    const pieces = /** @type {Piece[]} */ (board.squares.filter(piece => piece != undefined));
+    const pieces = board.squares.filter(piece => piece !== undefined) as Piece[];
     const whitePieces = pieces.filter(piece => piece.colour === Colour.WHITE);
     const blackPieces = pieces.filter(piece => piece.colour === Colour.BLACK);
 

@@ -1,13 +1,9 @@
-import Board from "./board.js";
-import { Colour, PieceType } from "./piece.js";
+import Board, { Coord } from "./board.js";
+import { Colour, Piece, PieceType } from "./piece.js";
 
-/** @typedef {import("./board.js").Coord} Coord */
-/** @typedef {import("./piece.js").Piece} Piece */
-
-/**
- * @typedef {Object} GameState
- * @property {Colour} currentTurn
- */
+interface GameState {
+    currentTurn: Colour;
+}
 
 /**
  * A game of chess.
@@ -18,28 +14,17 @@ import { Colour, PieceType } from "./piece.js";
  * See {@link Board} for detail on how board positions are indexed.
  */
 export default class Game {
-    /** @type {Board} */
-    #board = new Board();
-
-    /** @type {Readonly<Board>} */
-    get board() {
+    #board: Board = new Board();
+    get board(): Readonly<Board> {
         return this.#board;
     }
 
-    /** @type {GameState} */
-    #state = { currentTurn: Colour.WHITE };
-
-    /** @type {Readonly<GameState>} */
-    get state() {
+    #state: GameState = { currentTurn: Colour.WHITE };
+    get state(): Readonly<GameState> {
         return this.#state;
     }
 
-    /**
-     * @param {Coord} from
-     * @param {Coord} to
-     * @returns {void}
-     */
-    move(from, to) {
+    move(from: Coord, to: Coord): void {
         const piece = this.#board.get(from);
         if (piece?.colour !== this.#state.currentTurn) {
             throw new Error(`Cannot move piece at [${from}]`);
@@ -63,14 +48,7 @@ export default class Game {
         this.#state.currentTurn = this.#state.currentTurn === Colour.WHITE ? Colour.BLACK : Colour.WHITE;
     }
 
-    /**
-     * @param {Coord} from
-     * @param {Coord} to
-     * @param {Piece} piece
-     * @param {boolean} capturingPiece
-     * @returns {boolean}
-     */
-    #validPieceMovement(from, to, piece, capturingPiece) {
+    #validPieceMovement(from: Coord, to: Coord, piece: Piece, capturingPiece: boolean): boolean {
         const fileDiff = to[0] - from [0];
         const rankDiff = to[1] - from[1];
 
@@ -106,10 +84,7 @@ export default class Game {
         }
     }
 
-    /**
-     * @returns {string}
-     */
-    toJSON() {
+    toJSON(): string {
         return JSON.stringify({ state: this.#state, board: this.#board.squares });
     }
 }

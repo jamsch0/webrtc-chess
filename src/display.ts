@@ -1,18 +1,14 @@
-import Board, { BOARD_SIZE } from "./board.js";
+import Board, { BOARD_SIZE, Coord } from "./board.js";
 import { range } from "./iter.js";
 
-/** @typedef {import("./board.js").Coord} Coord */
-
 export default class Display {
-    /** @type {HTMLElement[]} */
-    #squares = [];
+    #squares: HTMLElement[] = [];
 
     constructor() {
         this.#initBoard();
     }
 
-    /** @returns {void} */
-    #initBoard() {
+    #initBoard(): void {
         const board = document.getElementById("game-board");
         if (board === null) {
             return;
@@ -44,31 +40,17 @@ export default class Display {
         }
     }
 
-    /**
-     * @param {Readonly<Board>} board
-     * @returns {void}
-     */
-    render(board) {
+    render(board: Readonly<Board>): void {
         for (const index of range(0, this.#squares.length)) {
             const x = index % BOARD_SIZE;
             const y = Math.floor(index / BOARD_SIZE);
-            const piece = board.get(/** @type {Coord} */ ([x, y]));
+            const piece = board.get([x, y] as Coord);
 
             this.#squares[index].innerText = piece ? `${piece.type}\n${piece.colour}` : "";
         }
     }
 
-    /**
-     * @memberof Display
-     *
-     * @param {number} x
-     * @param {number} y
-     *
-     * @returns {HTMLElement}
-     *
-     * @throws
-     */
-    getBoardElement(x, y) {
+    getBoardElement(x: number, y: number): HTMLElement {
         if (x >= BOARD_SIZE || y >= BOARD_SIZE) {
             throw new Error(`Position (${x},${y}) out of range`);
         }
