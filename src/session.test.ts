@@ -1,45 +1,31 @@
 import test from "ava";
 import { Colour } from "./piece.js";
-import Session, { MessageType } from "./session.js";
-
-/** @typedef {import("./session.js").MoveMessage} MoveMessage */
+import Session, { MessageType, MoveMessage } from "./session.js";
 
 class MockDataChannel {
-    /** @type {EventListener | undefined} */
-    #listener;
+    #listener: EventListener | undefined;
 
-    /**
-     * @param {string} type
-     * @param {EventListener} listener
-     * @returns {void}
-     */
-    addEventListener(type, listener) {
+    addEventListener(type: string, listener: EventListener): void {
         if (type === "message") {
             this.#listener = listener;
         }
     }
 
-    /**
-     * @param {any} data
-     * @returns {void}
-     */
-    send(data) {
+    send(data: any): void {
         const event = new MessageEvent("message", { data });
         this.#listener?.call(this, event);
     }
 }
 
-/** @returns {RTCDataChannel} */
-function createDataChannel() {
-    return /** @type {any} */ (new MockDataChannel());
+function createDataChannel(): RTCDataChannel {
+    return new MockDataChannel() as any;
 }
 
 test("move message", t => {
     const channel = createDataChannel();
     const session = new Session(channel, Colour.WHITE);
 
-    /** @type {MoveMessage} */
-    const message = {
+    const message: MoveMessage = {
         type: MessageType.MOVE,
         from: [0, 1],
         to: [0, 2],

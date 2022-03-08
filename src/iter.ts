@@ -1,10 +1,7 @@
 /**
  * Creates an iterator over the half-open range [from, to).
- * @param {number} from
- * @param {number} to
- * @returns {Generator<number>}
  */
-export function* range(from, to) {
+export function* range(from: number, to: number): Generator<number> {
     if (from === to) {
         return;
     }
@@ -22,10 +19,8 @@ export function* range(from, to) {
 
 /**
  * Creates an iterator that infinitely repeats x.
- * @param {number} x
- * @returns {Generator<number>}
  */
-export function* repeat(x) {
+export function* repeat(x: number): Generator<number, void, boolean> {
     let exit = false;
     while (!exit) {
         exit = yield x;
@@ -34,11 +29,8 @@ export function* repeat(x) {
 
 /**
  * Creates an iterator over pairs of values from a and b.
- * @param {Generator<number>} a
- * @param {Generator<number>} b
- * @returns {Generator<[number, number]>}
  */
-export function* zip(a, b) {
+export function* zip(a: Generator<number>, b: Generator<number>): Generator<[number, number]> {
     let aResult;
     let bResult;
 

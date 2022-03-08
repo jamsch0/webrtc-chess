@@ -2,8 +2,8 @@ name: CI/CD Workflow
 on: [push, pull_request]
 
 jobs:
-  test:
-    name: Test
+  build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -12,14 +12,27 @@ jobs:
     - name: Use Node.js
       uses: actions/setup-node@v3
 
-    - name: Test
+    - name: Build
       run: |
-        yarn install
-        yarn test
+        npm install
+        npm run build
+
+    - name: Test
+      run: npm test
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        if-no-files-found: error
+        path: |
+          index.html
+          style.css
+          build/**/*.js
+          !build/**/*.test.js
 
   deploy:
     name: Deploy
-    needs: test
+    needs: build
     runs-on: ubuntu-latest
     if: ${{github.event_name == 'push' && github.ref == 'refs/heads/main'}}
 
@@ -27,8 +40,11 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
+    - name: Download Artifact
+      uses: actions/download-artifact@v3
+
     - name: Deploy
       uses: JamesIves/github-pages-deploy-action@v4
       with:
         branch: gh-pages
-        folder: .
+        folder: artifact
