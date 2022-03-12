@@ -1,5 +1,5 @@
 import Board from "./board.js";
-import { Colour, PieceType } from "./piece.js";
+import dispatcher from "./dispatcher.js";
 /**
  * A game of chess.
  *
@@ -13,7 +13,7 @@ export default class Game {
     get board() {
         return this.#board;
     }
-    #state = { currentTurn: Colour.WHITE };
+    #state = { currentTurn: "white", moveCount: 0 };
     get state() {
         return this.#state;
     }
@@ -23,41 +23,44 @@ export default class Game {
             throw new Error(`Cannot move piece at [${from}]`);
         }
         const targetPiece = this.#board.get(to);
-        if (targetPiece?.colour === this.#state.currentTurn || targetPiece?.type === PieceType.KING) {
+        if (targetPiece?.colour === this.#state.currentTurn || targetPiece?.type === "king") {
             throw new Error(`Cannot capture piece at [${to}]`);
         }
-        if (!this.#validPieceMovement(from, to, piece, targetPiece != undefined)) {
+        if (!this.#isValidPieceMovement(from, to, piece, targetPiece != undefined)) {
             throw new Error(`Cannot move ${piece.type} from [${from}] to [${to}]`);
         }
-        if (piece.type !== PieceType.KNIGHT && !this.#board.clearLineOfSight(from, to)) {
+        if (piece.type !== "knight" && !this.#board.clearLineOfSight(from, to)) {
             throw new Error(`Move from [${from}] to [${to}] obstructed`);
         }
         this.#board.remove(to);
         this.#board.move(from, to);
-        this.#state.currentTurn = this.#state.currentTurn === Colour.WHITE ? Colour.BLACK : Colour.WHITE;
+        this.#state.currentTurn = this.#state.currentTurn === "white" ? "black" : "white";
+        this.#state.moveCount += 1;
+        const detail = { game: this, from, to, moveCount: this.#state.moveCount };
+        dispatcher.dispatchEvent(new CustomEvent("piecemoved", { detail }));
     }
-    #validPieceMovement(from, to, piece, capturingPiece) {
+    #isValidPieceMovement(from, to, piece, isCapturingPiece) {
         const fileDiff = to[0] - from[0];
         const rankDiff = to[1] - from[1];
         if (fileDiff === 0 && rankDiff === 0) {
             return false;
         }
         switch (piece.type) {
-            case PieceType.KING:
+            case "king":
                 return Math.abs(fileDiff) <= 1 && Math.abs(rankDiff) <= 1;
-            case PieceType.QUEEN:
+            case "queen":
                 return fileDiff === 0 || rankDiff === 0 || Math.abs(fileDiff) === Math.abs(rankDiff);
-            case PieceType.BISHOP:
+            case "bishop":
                 return Math.abs(fileDiff) === Math.abs(rankDiff);
-            case PieceType.KNIGHT:
+            case "knight":
                 return (Math.abs(fileDiff) === 1 && Math.abs(rankDiff) === 2)
                     || (Math.abs(fileDiff) === 2 && Math.abs(rankDiff) === 1);
-            case PieceType.ROOK:
+            case "rook":
                 return fileDiff === 0 || rankDiff === 0;
-            case PieceType.PAWN:
-                const direction = piece.colour === Colour.WHITE ? 1 : -1;
+            case "pawn":
+                const direction = piece.colour === "white" ? 1 : -1;
                 return (rankDiff === direction || (!piece.hasMoved && rankDiff === 2 * direction))
-                    && (capturingPiece ? Math.abs(fileDiff) === 1 : fileDiff === 0);
+                    && (isCapturingPiece ? Math.abs(fileDiff) === 1 : fileDiff === 0);
             default:
                 // unreachable
                 return false;

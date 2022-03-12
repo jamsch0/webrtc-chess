@@ -1,9 +1,11 @@
 import { BOARD_SIZE } from "./board.js";
+import dispatcher from "./dispatcher.js";
 import { range } from "./iter.js";
 export default class Display {
     #squares = [];
     constructor() {
         this.#initBoard();
+        dispatcher.addEventListener("piecemoved", event => this.render(event.detail.game.board));
     }
     #initBoard() {
         const board = document.getElementById("game-board");
