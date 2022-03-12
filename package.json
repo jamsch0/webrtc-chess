@@ -19,6 +19,13 @@
         "typescript": "^4.6.2"
     },
     "ava": {
+        "files": [
+            "src/**/*.test.ts",
+            "!src/common.test.ts"
+        ],
+        "require": [
+            "./build/common.test.js"
+        ],
         "typescript": {
             "compile": false,
             "rewritePaths": {

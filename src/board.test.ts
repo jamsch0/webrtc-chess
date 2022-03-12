@@ -1,6 +1,6 @@
 import test from "ava";
 import Board from "./board.js";
-import { Colour, Piece, PieceType } from "./piece.js";
+import Piece from "./piece.js";
 
 test("is created with correct number of squares", t => {
     const board = new Board();
@@ -11,28 +11,28 @@ test("is created with correct pieces", t => {
     const board = new Board();
 
     const pieces = board.squares.filter(piece => piece !== undefined) as Piece[];
-    const whitePieces = pieces.filter(piece => piece.colour === Colour.WHITE);
-    const blackPieces = pieces.filter(piece => piece.colour === Colour.BLACK);
+    const whitePieces = pieces.filter(piece => piece.colour === "white");
+    const blackPieces = pieces.filter(piece => piece.colour === "black");
 
     t.true(pieces.every(piece => !piece.hasMoved));
 
-    t.is(whitePieces.filter(piece => piece.type === PieceType.KING).length, 1);
-    t.is(blackPieces.filter(piece => piece.type === PieceType.KING).length, 1);
+    t.is(whitePieces.filter(piece => piece.type === "king").length, 1);
+    t.is(blackPieces.filter(piece => piece.type === "king").length, 1);
 
-    t.is(whitePieces.filter(piece => piece.type === PieceType.QUEEN).length, 1);
-    t.is(blackPieces.filter(piece => piece.type === PieceType.QUEEN).length, 1);
+    t.is(whitePieces.filter(piece => piece.type === "queen").length, 1);
+    t.is(blackPieces.filter(piece => piece.type === "queen").length, 1);
 
-    t.is(whitePieces.filter(piece => piece.type === PieceType.BISHOP).length, 2);
-    t.is(blackPieces.filter(piece => piece.type === PieceType.BISHOP).length, 2);
+    t.is(whitePieces.filter(piece => piece.type === "bishop").length, 2);
+    t.is(blackPieces.filter(piece => piece.type === "bishop").length, 2);
 
-    t.is(whitePieces.filter(piece => piece.type === PieceType.KNIGHT).length, 2);
-    t.is(blackPieces.filter(piece => piece.type === PieceType.KNIGHT).length, 2);
+    t.is(whitePieces.filter(piece => piece.type === "knight").length, 2);
+    t.is(blackPieces.filter(piece => piece.type === "knight").length, 2);
 
-    t.is(whitePieces.filter(piece => piece.type === PieceType.ROOK).length, 2);
-    t.is(blackPieces.filter(piece => piece.type === PieceType.ROOK).length, 2);
+    t.is(whitePieces.filter(piece => piece.type === "rook").length, 2);
+    t.is(blackPieces.filter(piece => piece.type === "rook").length, 2);
 
-    t.is(whitePieces.filter(piece => piece.type === PieceType.PAWN).length, 8);
-    t.is(blackPieces.filter(piece => piece.type === PieceType.PAWN).length, 8);
+    t.is(whitePieces.filter(piece => piece.type === "pawn").length, 8);
+    t.is(blackPieces.filter(piece => piece.type === "pawn").length, 8);
 });
 
 test("clearLineOfSight returns true when origin and target square are the same", t => {
@@ -65,14 +65,14 @@ test("clearLineOfSight returns false when one or more intermediate square is not
 
 test("place adds piece to square", t => {
     const board = new Board();
-    const piece = { colour: Colour.WHITE, type: PieceType.PAWN, hasMoved: false };
+    const piece: Piece = { colour: "white", type: "pawn", hasMoved: false };
     board.place(piece, [6, 4]);
     t.is(board.get([6, 4]), piece);
 });
 
 test("place throws error when square is already occupied", t => {
     const board = new Board();
-    const piece = { colour: Colour.WHITE, type: PieceType.PAWN, hasMoved: false };
+    const piece: Piece = { colour: "white", type: "pawn", hasMoved: false };
     t.throws(() => board.place(piece, [0, 1]), { message: "Existing piece at [0,1]" });
 });
 

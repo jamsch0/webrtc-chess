@@ -1,4 +1,4 @@
-import { Colour, Piece, PieceType } from "./piece.js";
+import Piece from "./piece.js";
 import { range, repeat, zip } from "./iter.js";
 
 export const BOARD_SIZE = 8;
@@ -28,31 +28,31 @@ export default class Board {
         this.#squares = new Array(BOARD_SIZE ** 2);
 
         // White
-        this.#squares[0] = { colour: Colour.WHITE, type: PieceType.ROOK, hasMoved: false };
-        this.#squares[1] = { colour: Colour.WHITE, type: PieceType.KNIGHT, hasMoved: false };
-        this.#squares[2] = { colour: Colour.WHITE, type: PieceType.BISHOP, hasMoved: false };
-        this.#squares[3] = { colour: Colour.WHITE, type: PieceType.QUEEN, hasMoved: false };
-        this.#squares[4] = { colour: Colour.WHITE, type: PieceType.KING, hasMoved: false };
-        this.#squares[5] = { colour: Colour.WHITE, type: PieceType.BISHOP, hasMoved: false };
-        this.#squares[6] = { colour: Colour.WHITE, type: PieceType.KNIGHT, hasMoved: false };
-        this.#squares[7] = { colour: Colour.WHITE, type: PieceType.ROOK, hasMoved: false };
+        this.#squares[0] = { colour: "white", type: "rook", hasMoved: false };
+        this.#squares[1] = { colour: "white", type: "knight", hasMoved: false };
+        this.#squares[2] = { colour: "white", type: "bishop", hasMoved: false };
+        this.#squares[3] = { colour: "white", type: "queen", hasMoved: false };
+        this.#squares[4] = { colour: "white", type: "king", hasMoved: false };
+        this.#squares[5] = { colour: "white", type: "bishop", hasMoved: false };
+        this.#squares[6] = { colour: "white", type: "knight", hasMoved: false };
+        this.#squares[7] = { colour: "white", type: "rook", hasMoved: false };
 
         for (const i of range(0, BOARD_SIZE)) {
-            this.#squares[BOARD_SIZE + i] = { colour: Colour.WHITE, type: PieceType.PAWN, hasMoved: false };
+            this.#squares[BOARD_SIZE + i] = { colour: "white", type: "pawn", hasMoved: false };
         }
 
         // Black
-        this.#squares[(7 * BOARD_SIZE) + 0] = { colour: Colour.BLACK, type: PieceType.ROOK, hasMoved: false };
-        this.#squares[(7 * BOARD_SIZE) + 1] = { colour: Colour.BLACK, type: PieceType.KNIGHT, hasMoved: false };
-        this.#squares[(7 * BOARD_SIZE) + 2] = { colour: Colour.BLACK, type: PieceType.BISHOP, hasMoved: false };
-        this.#squares[(7 * BOARD_SIZE) + 3] = { colour: Colour.BLACK, type: PieceType.QUEEN, hasMoved: false };
-        this.#squares[(7 * BOARD_SIZE) + 4] = { colour: Colour.BLACK, type: PieceType.KING, hasMoved: false };
-        this.#squares[(7 * BOARD_SIZE) + 5] = { colour: Colour.BLACK, type: PieceType.BISHOP, hasMoved: false };
-        this.#squares[(7 * BOARD_SIZE) + 6] = { colour: Colour.BLACK, type: PieceType.KNIGHT, hasMoved: false };
-        this.#squares[(7 * BOARD_SIZE) + 7] = { colour: Colour.BLACK, type: PieceType.ROOK, hasMoved: false };
+        this.#squares[(7 * BOARD_SIZE) + 0] = { colour: "black", type: "rook", hasMoved: false };
+        this.#squares[(7 * BOARD_SIZE) + 1] = { colour: "black", type: "knight", hasMoved: false };
+        this.#squares[(7 * BOARD_SIZE) + 2] = { colour: "black", type: "bishop", hasMoved: false };
+        this.#squares[(7 * BOARD_SIZE) + 3] = { colour: "black", type: "queen", hasMoved: false };
+        this.#squares[(7 * BOARD_SIZE) + 4] = { colour: "black", type: "king", hasMoved: false };
+        this.#squares[(7 * BOARD_SIZE) + 5] = { colour: "black", type: "bishop", hasMoved: false };
+        this.#squares[(7 * BOARD_SIZE) + 6] = { colour: "black", type: "knight", hasMoved: false };
+        this.#squares[(7 * BOARD_SIZE) + 7] = { colour: "black", type: "rook", hasMoved: false };
 
         for (const i of range(0, BOARD_SIZE)) {
-            this.#squares[(6 * BOARD_SIZE) + i] = { colour: Colour.BLACK, type: PieceType.PAWN, hasMoved: false };
+            this.#squares[(6 * BOARD_SIZE) + i] = { colour: "black", type: "pawn", hasMoved: false };
         }
     }
 

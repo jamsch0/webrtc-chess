@@ -1,5 +1,6 @@
 import { Coord } from "./board.js";
-import Game from "./game.js";
+import dispatcher from "./dispatcher.js";
+import Game, { PieceMovedEvent } from "./game.js";
 import { Colour } from "./piece.js";
 
 const CONNECTION_CONFIG: RTCConfiguration = {
@@ -25,22 +26,25 @@ export default class Session {
         this.#channel = channel;
         this.#player = player;
 
-        this.#addChannelEventListeners();
-    }
-
-    #addChannelEventListeners(): void {
         this.#channel.addEventListener("open", () => console.info("Session established"))
         this.#channel.addEventListener("close", () => console.info("Session terminated"));
         this.#channel.addEventListener("message", event => this.#onMessage(event));
+
+        dispatcher.addEventListener<PieceMovedEvent>("piecemoved", event => {
+            const { from, to, moveCount } = event.detail;
+            this.#sendMessage({ type: "move", from, to, moveCount });
+        });
     }
 
     #onMessage(event: MessageEvent): void {
         const message: Message = JSON.parse(event.data);
+        console.log(`${this.#player}: received message`, new Date().toISOString(), message);
 
         switch (message.type) {
-            case MessageType.MOVE:
-                const move = message as MoveMessage;
-                this.#game.move(move.from, move.to);
+            case "move":
+                if (message.moveCount > this.#game.state.moveCount) {
+                    this.#game.move(message.from, message.to);
+                }
                 break;
 
             default:
@@ -50,22 +54,10 @@ export default class Session {
     }
 
     #sendMessage(message: Message): void {
+        console.log(`${this.#player}: sending message`, new Date().toISOString(), message);
         this.#channel.send(JSON.stringify(message));
     }
 }
 
-export type MessageType = "move";
-
-export const MessageType: { [k: string]: MessageType } = {
-    MOVE: "move",
-};
-
-export interface Message {
-    readonly type: MessageType;
-}
-
-export interface MoveMessage extends Message {
-    readonly type: "move";
-    readonly from: Coord;
-    readonly to: Coord;
-}
+export type Message =
+    | { type: "move", from: Coord, to: Coord, moveCount: number };

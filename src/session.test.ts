@@ -1,6 +1,5 @@
 import test from "ava";
-import { Colour } from "./piece.js";
-import Session, { MessageType, MoveMessage } from "./session.js";
+import Session, { Message } from "./session.js";
 
 class MockDataChannel {
     #listener: EventListener | undefined;
@@ -23,12 +22,13 @@ function createDataChannel(): RTCDataChannel {
 
 test("move message", t => {
     const channel = createDataChannel();
-    const session = new Session(channel, Colour.WHITE);
+    const session = new Session(channel, "white");
 
-    const message: MoveMessage = {
-        type: MessageType.MOVE,
+    const message: Message = {
+        type: "move",
         from: [0, 1],
         to: [0, 2],
+        moveCount: 1,
     };
 
     const piece = session.game.board.get(message.from);
