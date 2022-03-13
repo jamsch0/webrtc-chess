@@ -1,6 +1,6 @@
 import Board, { BOARD_SIZE, Coord } from "./board.js";
 import dispatcher from "./dispatcher.js";
-import { PieceMovedEvent } from "./game.js";
+import { PieceMovedEvent, SquareSelectedEvent } from "./game.js";
 import { range } from "./iter.js";
 
 export default class Display {
@@ -19,6 +19,8 @@ export default class Display {
 
         board.innerHTML = "";
         board.style.setProperty("grid-template-columns", "auto ".repeat(BOARD_SIZE));
+
+        board.addEventListener("click", event => this.#onClick(event));
 
         this.#squares = new Array(BOARD_SIZE ** 2);
         for (const index of range(0, this.#squares.length)) {
@@ -53,11 +55,19 @@ export default class Display {
         }
     }
 
-    getBoardElement(x: number, y: number): HTMLElement {
-        if (x >= BOARD_SIZE || y >= BOARD_SIZE) {
-            throw new Error(`Position (${x},${y}) out of range`);
-        }
+    #onClick(event: MouseEvent): void {
+        const target = event.currentTarget as HTMLElement;
 
-        return this.#squares[x + (BOARD_SIZE * y)];
+        const squareWidth = target.clientWidth / BOARD_SIZE;
+        const squareHeight = target.clientHeight / BOARD_SIZE;
+
+        const relativeX = event.clientX - target.offsetLeft;
+        const relativeY = event.clientY - target.offsetTop;
+
+        const x = Math.floor(relativeX / squareWidth);
+        const y = Math.floor((target.clientHeight - relativeY) / squareHeight);
+
+        const detail: SquareSelectedEvent = { pos: [x, y] as Coord };
+        dispatcher.dispatchEvent(new CustomEvent("squareselected", { detail }));
     }
 }

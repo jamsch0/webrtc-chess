@@ -1,6 +1,10 @@
 import Board, { Coord } from "./board.js";
-import dispatcher from "./dispatcher.js";
+import dispatcher, { DispatchEventListener } from "./dispatcher.js";
 import Piece, { Colour } from "./piece.js";
+
+export interface SquareSelectedEvent {
+    readonly pos: Coord;
+}
 
 export interface PieceMovedEvent {
     readonly game: Game,
@@ -12,6 +16,7 @@ export interface PieceMovedEvent {
 interface GameState {
     currentTurn: Colour;
     moveCount: number;
+    selectedSquare?: Coord;
 }
 
 /**
@@ -33,6 +38,24 @@ export default class Game {
         return this.#state;
     }
 
+    #eventListeners: Map<string, DispatchEventListener<any>> = new Map();
+
+    constructor() {
+        const onSquareSelected = this.#onSquareSelected.bind(this);
+        this.#addEventListener("squareselected", onSquareSelected);
+    }
+
+    #addEventListener<T>(type: string, listener: DispatchEventListener<T>): void {
+        dispatcher.addEventListener(type, listener);
+        this.#eventListeners.set(type, listener);
+    }
+
+    removeEventListeners(): void {
+        for (const [type, listener] of this.#eventListeners.entries()) {
+            dispatcher.removeEventListener(type, listener);
+        }
+    }
+
     move(from: Coord, to: Coord): void {
         const piece = this.#board.get(from);
         if (piece?.colour !== this.#state.currentTurn) {
@@ -44,7 +67,7 @@ export default class Game {
             throw new Error(`Cannot capture piece at [${to}]`);
         }
 
-        if (!this.#isValidPieceMovement(from, to, piece, targetPiece != undefined)) {
+        if (!this.#isValidPieceMovement(from, to, piece, targetPiece !== undefined)) {
             throw new Error(`Cannot move ${piece.type} from [${from}] to [${to}]`);
         }
 
@@ -94,6 +117,23 @@ export default class Game {
             default:
                 // unreachable
                 return false;
+        }
+    }
+
+    #onSquareSelected(event: CustomEvent<SquareSelectedEvent>): void {
+        const from = this.#state.selectedSquare;
+        if (from === undefined) {
+            this.#state.selectedSquare = event.detail.pos;
+            return;
+        }
+
+        try {
+            const to = event.detail.pos;
+            this.move(from, to);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            this.#state.selectedSquare = undefined;
         }
     }
 
