@@ -14,6 +14,7 @@ export default class Display {
         }
         board.innerHTML = "";
         board.style.setProperty("grid-template-columns", "auto ".repeat(BOARD_SIZE));
+        board.addEventListener("click", event => this.#onClick(event));
         this.#squares = new Array(BOARD_SIZE ** 2);
         for (const index of range(0, this.#squares.length)) {
             const x = index % BOARD_SIZE;
@@ -40,10 +41,15 @@ export default class Display {
             this.#squares[index].innerText = piece ? `${piece.type}\n${piece.colour}` : "";
         }
     }
-    getBoardElement(x, y) {
-        if (x >= BOARD_SIZE || y >= BOARD_SIZE) {
-            throw new Error(`Position (${x},${y}) out of range`);
-        }
-        return this.#squares[x + (BOARD_SIZE * y)];
+    #onClick(event) {
+        const target = event.currentTarget;
+        const squareWidth = target.clientWidth / BOARD_SIZE;
+        const squareHeight = target.clientHeight / BOARD_SIZE;
+        const relativeX = event.clientX - target.offsetLeft;
+        const relativeY = event.clientY - target.offsetTop;
+        const x = Math.floor(relativeX / squareWidth);
+        const y = Math.floor((target.clientHeight - relativeY) / squareHeight);
+        const detail = { pos: [x, y] };
+        dispatcher.dispatchEvent(new CustomEvent("squareselected", { detail }));
     }
 }

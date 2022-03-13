@@ -17,6 +17,20 @@ export default class Game {
     get state() {
         return this.#state;
     }
+    #eventListeners = new Map();
+    constructor() {
+        const onSquareSelected = this.#onSquareSelected.bind(this);
+        this.#addEventListener("squareselected", onSquareSelected);
+    }
+    #addEventListener(type, listener) {
+        dispatcher.addEventListener(type, listener);
+        this.#eventListeners.set(type, listener);
+    }
+    removeEventListeners() {
+        for (const [type, listener] of this.#eventListeners.entries()) {
+            dispatcher.removeEventListener(type, listener);
+        }
+    }
     move(from, to) {
         const piece = this.#board.get(from);
         if (piece?.colour !== this.#state.currentTurn) {
@@ -26,7 +40,7 @@ export default class Game {
         if (targetPiece?.colour === this.#state.currentTurn || targetPiece?.type === "king") {
             throw new Error(`Cannot capture piece at [${to}]`);
         }
-        if (!this.#isValidPieceMovement(from, to, piece, targetPiece != undefined)) {
+        if (!this.#isValidPieceMovement(from, to, piece, targetPiece !== undefined)) {
             throw new Error(`Cannot move ${piece.type} from [${from}] to [${to}]`);
         }
         if (piece.type !== "knight" && !this.#board.clearLineOfSight(from, to)) {
@@ -64,6 +78,23 @@ export default class Game {
             default:
                 // unreachable
                 return false;
+        }
+    }
+    #onSquareSelected(event) {
+        const from = this.#state.selectedSquare;
+        if (from === undefined) {
+            this.#state.selectedSquare = event.detail.pos;
+            return;
+        }
+        try {
+            const to = event.detail.pos;
+            this.move(from, to);
+        }
+        catch (error) {
+            console.error(error);
+        }
+        finally {
+            this.#state.selectedSquare = undefined;
         }
     }
     toJSON() {
