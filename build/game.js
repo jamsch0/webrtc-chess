@@ -17,19 +17,12 @@ export default class Game {
     get state() {
         return this.#state;
     }
-    #eventListeners = new Map();
+    #eventListening = new AbortController();
     constructor() {
-        const onSquareSelected = this.#onSquareSelected.bind(this);
-        this.#addEventListener("squareselected", onSquareSelected);
+        dispatcher.addEventListener("squareselected", event => this.#onSquareSelected(event), { signal: this.#eventListening.signal });
     }
-    #addEventListener(type, listener) {
-        dispatcher.addEventListener(type, listener);
-        this.#eventListeners.set(type, listener);
-    }
-    removeEventListeners() {
-        for (const [type, listener] of this.#eventListeners.entries()) {
-            dispatcher.removeEventListener(type, listener);
-        }
+    destroy() {
+        this.#eventListening.abort();
     }
     move(from, to) {
         const piece = this.#board.get(from);
