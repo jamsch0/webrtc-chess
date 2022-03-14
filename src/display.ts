@@ -1,6 +1,6 @@
 import Board, { BOARD_SIZE, Coord } from "./board.js";
 import dispatcher from "./dispatcher.js";
-import { PieceMovedEvent, SquareSelectedEvent } from "./game.js";
+import { SquareSelectedEvent } from "./game.js";
 import { range } from "./iter.js";
 
 export default class Display {
@@ -8,7 +8,7 @@ export default class Display {
 
     constructor() {
         this.#initBoard();
-        dispatcher.addEventListener<PieceMovedEvent>("piecemoved", event => this.render(event.detail.game.board));
+        dispatcher.addEventListener("piecemoved", event => this.render(event.detail.game.board));
     }
 
     #initBoard(): void {

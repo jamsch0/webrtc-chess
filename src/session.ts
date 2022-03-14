@@ -1,6 +1,6 @@
 import { Coord } from "./board.js";
 import dispatcher from "./dispatcher.js";
-import Game, { PieceMovedEvent } from "./game.js";
+import Game from "./game.js";
 import { Colour } from "./piece.js";
 
 const CONNECTION_CONFIG: RTCConfiguration = {
@@ -30,7 +30,7 @@ export default class Session {
         this.#channel.addEventListener("close", () => console.info("Session terminated"));
         this.#channel.addEventListener("message", event => this.#onMessage(event));
 
-        dispatcher.addEventListener<PieceMovedEvent>("piecemoved", event => {
+        dispatcher.addEventListener("piecemoved", event => {
             const { from, to, moveCount } = event.detail;
             this.#sendMessage({ type: "move", from, to, moveCount });
         });

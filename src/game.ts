@@ -1,16 +1,23 @@
 import Board, { Coord } from "./board.js";
-import dispatcher, { DispatchEventListener } from "./dispatcher.js";
+import dispatcher from "./dispatcher.js";
 import Piece, { Colour } from "./piece.js";
-
-export interface SquareSelectedEvent {
-    readonly pos: Coord;
-}
 
 export interface PieceMovedEvent {
     readonly game: Game,
     readonly from: Coord,
     readonly to: Coord,
     readonly moveCount: number,
+}
+
+export interface SquareSelectedEvent {
+    readonly pos: Coord;
+}
+
+declare global {
+    interface DispatcherEventMap {
+        "piecemoved": PieceMovedEvent;
+        "squareselected": SquareSelectedEvent;
+    }
 }
 
 interface GameState {
@@ -38,22 +45,18 @@ export default class Game {
         return this.#state;
     }
 
-    #eventListeners: Map<string, DispatchEventListener<any>> = new Map();
+    #eventListening = new AbortController();
 
     constructor() {
-        const onSquareSelected = this.#onSquareSelected.bind(this);
-        this.#addEventListener("squareselected", onSquareSelected);
+        dispatcher.addEventListener(
+            "squareselected",
+            event => this.#onSquareSelected(event),
+            { signal: this.#eventListening.signal },
+        );
     }
 
-    #addEventListener<T>(type: string, listener: DispatchEventListener<T>): void {
-        dispatcher.addEventListener(type, listener);
-        this.#eventListeners.set(type, listener);
-    }
-
-    removeEventListeners(): void {
-        for (const [type, listener] of this.#eventListeners.entries()) {
-            dispatcher.removeEventListener(type, listener);
-        }
+    destroy(): void {
+        this.#eventListening.abort();
     }
 
     move(from: Coord, to: Coord): void {
