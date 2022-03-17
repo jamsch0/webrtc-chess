@@ -54,7 +54,7 @@ test("move updates piece position and swaps current player", t => {
 });
 
 test.serial("move updates move count and dispatches piecemoved event", t => {
-    dispatcher.addEventListener("piecemoved", event => {
+    dispatcher.addEventListener("pieceMoved", event => {
         t.is(event.detail.game, t.context);
         t.is(event.detail.moveCount, 1);
         t.deepEqual(event.detail.from, [3, 1]);

@@ -24,7 +24,7 @@ export default class Session {
         this.#channel.addEventListener("close", () => console.info("Session terminated"));
         this.#channel.addEventListener("message", event => this.#onMessage(event));
 
-        dispatcher.addEventListener("piecemoved", event => {
+        dispatcher.addEventListener("pieceMoved", event => {
             const { from, to, moveCount } = event.detail;
             this.#sendMessage({ type: "move", from, to, moveCount });
         });

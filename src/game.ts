@@ -15,8 +15,8 @@ export interface SquareSelectedEvent {
 
 declare global {
     interface DispatcherEventMap {
-        "piecemoved": PieceMovedEvent;
-        "squareselected": SquareSelectedEvent;
+        "pieceMoved": PieceMovedEvent;
+        "squareSelected": SquareSelectedEvent;
     }
 }
 
@@ -48,11 +48,7 @@ export default class Game {
     #eventListening = new AbortController();
 
     constructor() {
-        dispatcher.addEventListener(
-            "squareselected",
-            event => this.#onSquareSelected(event),
-            { signal: this.#eventListening.signal },
-        );
+        dispatcher.addEventListener("squareSelected", this, { signal: this.#eventListening.signal });
     }
 
     destroy(): void {
@@ -123,7 +119,7 @@ export default class Game {
         }
     }
 
-    #onSquareSelected(event: CustomEvent<SquareSelectedEvent>): void {
+    onSquareSelected(event: CustomEvent<SquareSelectedEvent>): void {
         const from = this.#state.selectedSquare;
         if (from === undefined) {
             this.#state.selectedSquare = event.detail.pos;
