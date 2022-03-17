@@ -1,7 +1,7 @@
 import Session from "./session.js";
 import Display from "./display.js";
 
-const connection = new RTCPeerConnection();
+const connection = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.stunprotocol.org" } ]});
 const display = new Display();
 
 (globalThis as any).hostGame = async () => {

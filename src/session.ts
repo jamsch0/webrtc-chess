@@ -3,12 +3,6 @@ import dispatcher from "./dispatcher.js";
 import Game from "./game.js";
 import { Colour } from "./piece.js";
 
-const CONNECTION_CONFIG: RTCConfiguration = {
-    iceServers: [
-        { urls: "stun:stun.stunprotocol.org" },
-    ],
-};
-
 export default class Session {
     #channel: RTCDataChannel;
 
