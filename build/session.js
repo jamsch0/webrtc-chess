@@ -1,10 +1,5 @@
 import dispatcher from "./dispatcher.js";
 import Game from "./game.js";
-const CONNECTION_CONFIG = {
-    iceServers: [
-        { urls: "stun:stun.stunprotocol.org" },
-    ],
-};
 export default class Session {
     #channel;
     #game = new Game();
