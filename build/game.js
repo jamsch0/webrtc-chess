@@ -1,4 +1,4 @@
-import Board from "./board.js";
+import Board, { indexToCoord } from "./board.js";
 import dispatcher from "./dispatcher.js";
 /**
  * A game of chess.
@@ -36,13 +36,21 @@ export default class Game {
         if (!this.#isValidPieceMovement(from, to, piece, targetPiece !== undefined)) {
             throw new Error(`Cannot move ${piece.type} from [${from}] to [${to}]`);
         }
-        if (piece.type !== "knight" && !this.#board.clearLineOfSight(from, to)) {
+        if (piece.type !== "knight" && !this.#board.hasClearLineOfSight(from, to)) {
             throw new Error(`Move from [${from}] to [${to}] obstructed`);
         }
         this.#board.remove(to);
         this.#board.move(from, to);
+        if (this.#isKingInCheck(this.#state.currentTurn)) {
+            this.#board.move(to, from);
+            if (targetPiece !== undefined) {
+                this.#board.place(targetPiece, to);
+            }
+            throw new Error("Cannot end turn with king in check");
+        }
         this.#state.currentTurn = this.#state.currentTurn === "white" ? "black" : "white";
         this.#state.moveCount += 1;
+        this.#state.inCheck = this.#isKingInCheck(this.#state.currentTurn) ? this.#state.currentTurn : undefined;
         const detail = { game: this, from, to, moveCount: this.#state.moveCount };
         dispatcher.dispatchEvent(new CustomEvent("piecemoved", { detail }));
     }
@@ -72,6 +80,22 @@ export default class Game {
                 // unreachable
                 return false;
         }
+    }
+    #canPieceCaptureTarget(from, to, piece, targetPiece) {
+        return piece.colour !== targetPiece.colour
+            && this.#isValidPieceMovement(from, to, piece, true)
+            && (piece.type === "knight" || this.#board.hasClearLineOfSight(from, to));
+    }
+    #isKingInCheck(colour) {
+        const kingPos = this.#board.findPos(colour, "king");
+        const king = this.#board.get(kingPos);
+        for (const [index, piece] of this.#board.squares.entries()) {
+            const piecePos = indexToCoord(index);
+            if (piece !== undefined && this.#canPieceCaptureTarget(piecePos, kingPos, piece, king)) {
+                return true;
+            }
+        }
+        return false;
     }
     #onSquareSelected(event) {
         const from = this.#state.selectedSquare;

@@ -1,4 +1,4 @@
-import { BOARD_SIZE } from "./board.js";
+import { BOARD_SIZE, indexToCoord } from "./board.js";
 import dispatcher from "./dispatcher.js";
 import { range } from "./iter.js";
 export default class Display {
@@ -17,14 +17,13 @@ export default class Display {
         board.addEventListener("click", event => this.#onClick(event));
         this.#squares = new Array(BOARD_SIZE ** 2);
         for (const index of range(0, this.#squares.length)) {
-            const x = index % BOARD_SIZE;
-            const y = Math.floor(index / BOARD_SIZE);
+            const pos = indexToCoord(index);
             const square = document.createElement("div");
-            const colour = (x + y) % 2 === 0 ? "black" : "white";
+            const colour = (pos[0] + pos[1]) % 2 === 0 ? "black" : "white";
             square.classList.add("square", colour);
             const position = document.createElement("span");
             position.classList.add("square-position");
-            position.innerText = `[${x}, ${y}]`;
+            position.innerText = `[${pos[0]}, ${pos[1]}]`;
             square.appendChild(position);
             const content = document.createElement("div");
             content.classList.add("square-content");
@@ -35,9 +34,7 @@ export default class Display {
     }
     render(board) {
         for (const index of range(0, this.#squares.length)) {
-            const x = index % BOARD_SIZE;
-            const y = Math.floor(index / BOARD_SIZE);
-            const piece = board.get([x, y]);
+            const piece = board.get(indexToCoord(index));
             this.#squares[index].innerText = piece ? `${piece.type}\n${piece.colour}` : "";
         }
     }

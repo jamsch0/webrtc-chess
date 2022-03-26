@@ -1,5 +1,11 @@
 import { range, repeat, zip } from "./iter.js";
 export const BOARD_SIZE = 8;
+export function coordToIndex(pos) {
+    return (pos[1] * BOARD_SIZE) + pos[0];
+}
+export function indexToCoord(index) {
+    return [index % BOARD_SIZE, Math.floor(index / BOARD_SIZE)];
+}
 /**
  * A chess board.
  *
@@ -44,12 +50,16 @@ export default class Board {
         }
     }
     get(pos) {
-        return this.#squares[(pos[1] * BOARD_SIZE) + pos[0]];
+        return this.#squares[coordToIndex(pos)];
+    }
+    findPos(colour, type) {
+        const index = this.#squares.findIndex(piece => piece?.colour === colour && piece.type === type);
+        return index > -1 ? indexToCoord(index) : undefined;
     }
     /**
      * Checks if every square in a straight line between from and to (exclusive) is empty.
      */
-    clearLineOfSight(from, to) {
+    hasClearLineOfSight(from, to) {
         const fileDiff = to[0] - from[0];
         const rankDiff = to[1] - from[1];
         if (fileDiff === 0 && rankDiff === 0) {
@@ -70,14 +80,14 @@ export default class Board {
         return true;
     }
     place(piece, pos) {
-        const i = (pos[1] * BOARD_SIZE) + pos[0];
+        const i = coordToIndex(pos);
         if (this.#squares[i] != undefined) {
             throw new Error(`Existing piece at [${pos}]`);
         }
         this.#squares[i] = piece;
     }
     remove(pos) {
-        this.#squares[(pos[1] * BOARD_SIZE) + pos[0]] = undefined;
+        this.#squares[coordToIndex(pos)] = undefined;
     }
     move(from, to) {
         const piece = this.get(from);
