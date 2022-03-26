@@ -81,6 +81,16 @@ export default class Game {
 
         this.#board.remove(to);
         this.#board.move(from, to);
+
+        if (this.#isKingInCheck(this.#state.currentTurn)) {
+            this.#board.move(to, from);
+            if (targetPiece !== undefined) {
+                this.#board.place(targetPiece, to);
+            }
+
+            throw new Error("Cannot end turn with king in check");
+        }
+
         this.#state.currentTurn = this.#state.currentTurn === "white" ? "black" : "white";
         this.#state.moveCount += 1;
         this.#state.inCheck = this.#isKingInCheck(this.#state.currentTurn) ? this.#state.currentTurn : undefined;

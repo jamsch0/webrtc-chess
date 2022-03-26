@@ -38,6 +38,16 @@ test("move throws error when one or more intermediate square is not empty unless
     t.context.move([1, 0], [2, 2]);
 });
 
+test("move throws error when king ends turn in check", t => {
+    t.context.board.move([4, 0], [4, 4]);
+    t.throws(() => t.context.move([4, 4], [4, 5]), { message: "Cannot end turn with king in check" });
+
+    t.context.board.move([4, 4], [4, 5]);
+    t.throws(() => t.context.move([4, 5], [3, 5]), { message: "Cannot end turn with king in check" });
+
+    t.notThrows(() => t.context.move([4, 5], [4, 4]));
+});
+
 test("move updates piece position and swaps current player", t => {
     let piece = t.context.board.get([3, 1]);
     t.context.move([3, 1], [3, 3]);
@@ -77,7 +87,7 @@ test("move updates in check when piece causes discovered check of opponent king"
     t.context.move([4, 3], [5, 2]);
     t.is(t.context.state.inCheck, "black");
 
-    t.context.move([4, 4], [3, 4]);
+    t.context.move([4, 4], [3, 5]);
     t.is(t.context.state.inCheck, undefined);
 });
 
