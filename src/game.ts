@@ -1,4 +1,4 @@
-import Board, { Coord } from "./board.js";
+import Board, { Coord, indexToCoord } from "./board.js";
 import dispatcher from "./dispatcher.js";
 import Piece, { Colour } from "./piece.js";
 
@@ -83,14 +83,7 @@ export default class Game {
         this.#board.move(from, to);
         this.#state.currentTurn = this.#state.currentTurn === "white" ? "black" : "white";
         this.#state.moveCount += 1;
-
-        const kingPos = this.#board.findPos(this.#state.currentTurn, "king");
-        if (kingPos !== undefined) {
-            const king = this.#board.get(kingPos)!;
-            this.#state.inCheck = this.#canPieceCaptureTarget(to, kingPos, piece, king)
-                ? this.#state.currentTurn
-                : undefined;
-        }
+        this.#state.inCheck = this.#isKingInCheck(this.#state.currentTurn) ? this.#state.currentTurn : undefined;
 
         const detail: PieceMovedEvent = { game: this, from, to, moveCount: this.#state.moveCount };
         dispatcher.dispatchEvent(new CustomEvent("piecemoved", { detail }));
@@ -136,6 +129,20 @@ export default class Game {
         return piece.colour !== targetPiece.colour
             && this.#isValidPieceMovement(from, to, piece, true)
             && (piece.type === "knight" || this.#board.hasClearLineOfSight(from, to));
+    }
+
+    #isKingInCheck(colour: Colour): boolean {
+        const kingPos = this.#board.findPos(colour, "king")!;
+        const king = this.#board.get(kingPos)!;
+
+        for (const [index, piece] of this.#board.squares.entries()) {
+            const piecePos = indexToCoord(index);
+            if (piece !== undefined && this.#canPieceCaptureTarget(piecePos, kingPos, piece, king)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     #onSquareSelected(event: CustomEvent<SquareSelectedEvent>): void {

@@ -53,7 +53,7 @@ test("move updates piece position and swaps current player", t => {
     t.is(t.context.state.currentTurn, "white");
 });
 
-test("move updates in check", t => {
+test("move updates in check when piece directly checks opponent king", t => {
     t.context.move([5, 1], [5, 2]);
     t.context.move([4, 6], [4, 5]);
     t.context.move([6, 1], [6, 3]);
@@ -65,6 +65,19 @@ test("move updates in check", t => {
     t.is(t.context.state.inCheck, "white");
 
     t.context.move([4, 0], [3, 1]);
+    t.is(t.context.state.inCheck, undefined);
+});
+
+test("move updates in check when piece causes discovered check of opponent king", t => {
+    t.context.board.move([0, 0], [4, 2]);
+    t.context.board.move([2, 0], [4, 3]);
+    t.context.board.move([4, 7], [4, 4]);
+    t.is(t.context.state.inCheck, undefined);
+
+    t.context.move([4, 3], [5, 2]);
+    t.is(t.context.state.inCheck, "black");
+
+    t.context.move([4, 4], [3, 4]);
     t.is(t.context.state.inCheck, undefined);
 });
 
