@@ -1,10 +1,18 @@
-import Piece from "./piece.js";
+import Piece, { Colour, PieceType } from "./piece.js";
 import { range, repeat, zip } from "./iter.js";
 
 export const BOARD_SIZE = 8;
 
 type CoordElem = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export type Coord = readonly [CoordElem, CoordElem];
+
+export function coordToIndex(pos: Coord): number {
+    return (pos[1] * BOARD_SIZE) + pos[0];
+}
+
+export function indexToCoord(index: number): Coord {
+    return [index % BOARD_SIZE, Math.floor(index / BOARD_SIZE)] as Coord;
+}
 
 /**
  * A chess board.
@@ -57,13 +65,18 @@ export default class Board {
     }
 
     get(pos: Coord): Piece | undefined {
-        return this.#squares[(pos[1] * BOARD_SIZE) + pos[0]];
+        return this.#squares[coordToIndex(pos)];
+    }
+
+    findPos(colour: Colour, type: PieceType): Coord | undefined {
+        const index = this.#squares.findIndex(piece => piece?.colour === colour && piece.type === type);
+        return index > -1 ? indexToCoord(index) : undefined;
     }
 
     /**
      * Checks if every square in a straight line between from and to (exclusive) is empty.
      */
-    clearLineOfSight(from: Coord, to: Coord): boolean {
+    hasClearLineOfSight(from: Coord, to: Coord): boolean {
         const fileDiff = to[0] - from[0];
         const rankDiff = to[1] - from[1];
 
@@ -89,7 +102,7 @@ export default class Board {
     }
 
     place(piece: Piece, pos: Coord): void {
-        const i = (pos[1] * BOARD_SIZE) + pos[0];
+        const i = coordToIndex(pos);
         if (this.#squares[i] != undefined) {
             throw new Error(`Existing piece at [${pos}]`);
         }
@@ -98,7 +111,7 @@ export default class Board {
     }
 
     remove(pos: Coord): void {
-        this.#squares[(pos[1] * BOARD_SIZE) + pos[0]] = undefined;
+        this.#squares[coordToIndex(pos)] = undefined;
     }
 
     move(from: Coord, to: Coord): void {

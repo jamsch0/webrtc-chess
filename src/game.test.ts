@@ -53,6 +53,21 @@ test("move updates piece position and swaps current player", t => {
     t.is(t.context.state.currentTurn, "white");
 });
 
+test("move updates in check", t => {
+    t.context.move([5, 1], [5, 2]);
+    t.context.move([4, 6], [4, 5]);
+    t.context.move([6, 1], [6, 3]);
+    t.context.move([5, 6], [5, 4]);
+    t.context.move([3, 1], [3, 2]);
+    t.is(t.context.state.inCheck, undefined);
+
+    t.context.move([3, 7], [7, 3]);
+    t.is(t.context.state.inCheck, "white");
+
+    t.context.move([4, 0], [3, 1]);
+    t.is(t.context.state.inCheck, undefined);
+});
+
 test.serial("move updates move count and dispatches piecemoved event", t => {
     dispatcher.addEventListener("piecemoved", event => {
         t.is(event.detail.game, t.context);

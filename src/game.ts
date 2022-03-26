@@ -23,6 +23,7 @@ declare global {
 interface GameState {
     currentTurn: Colour;
     moveCount: number;
+    inCheck?: Colour;
     selectedSquare?: Coord;
 }
 
@@ -74,7 +75,7 @@ export default class Game {
             throw new Error(`Cannot move ${piece.type} from [${from}] to [${to}]`);
         }
 
-        if (piece.type !== "knight" && !this.#board.clearLineOfSight(from, to)) {
+        if (piece.type !== "knight" && !this.#board.hasClearLineOfSight(from, to)) {
             throw new Error(`Move from [${from}] to [${to}] obstructed`);
         }
 
@@ -83,12 +84,20 @@ export default class Game {
         this.#state.currentTurn = this.#state.currentTurn === "white" ? "black" : "white";
         this.#state.moveCount += 1;
 
+        const kingPos = this.#board.findPos(this.#state.currentTurn, "king");
+        if (kingPos !== undefined) {
+            const king = this.#board.get(kingPos)!;
+            this.#state.inCheck = this.#canPieceCaptureTarget(to, kingPos, piece, king)
+                ? this.#state.currentTurn
+                : undefined;
+        }
+
         const detail: PieceMovedEvent = { game: this, from, to, moveCount: this.#state.moveCount };
         dispatcher.dispatchEvent(new CustomEvent("piecemoved", { detail }));
     }
 
     #isValidPieceMovement(from: Coord, to: Coord, piece: Piece, isCapturingPiece: boolean): boolean {
-        const fileDiff = to[0] - from [0];
+        const fileDiff = to[0] - from[0];
         const rankDiff = to[1] - from[1];
 
         if (fileDiff === 0 && rankDiff === 0) {
@@ -121,6 +130,12 @@ export default class Game {
                 // unreachable
                 return false;
         }
+    }
+
+    #canPieceCaptureTarget(from: Coord, to: Coord, piece: Piece, targetPiece: Piece): boolean {
+        return piece.colour !== targetPiece.colour
+            && this.#isValidPieceMovement(from, to, piece, true)
+            && (piece.type === "knight" || this.#board.hasClearLineOfSight(from, to));
     }
 
     #onSquareSelected(event: CustomEvent<SquareSelectedEvent>): void {

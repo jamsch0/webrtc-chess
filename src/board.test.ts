@@ -35,32 +35,32 @@ test("is created with correct pieces", t => {
     t.is(blackPieces.filter(piece => piece.type === "pawn").length, 8);
 });
 
-test("clearLineOfSight returns true when origin and target square are the same", t => {
+test("hasClearLineOfSight returns true when origin and target square are the same", t => {
     const board = new Board();
-    t.true(board.clearLineOfSight([5, 5], [5, 5]));
+    t.true(board.hasClearLineOfSight([5, 5], [5, 5]));
 });
 
-test("clearLineOfSight returns false for squares not on the same rank, file, or diagonal", t => {
+test("hasClearLineOfSight returns false for squares not on the same rank, file, or diagonal", t => {
     const board = new Board();
-    t.false(board.clearLineOfSight([2, 3], [5, 5]));
+    t.false(board.hasClearLineOfSight([2, 3], [5, 5]));
 });
 
-test("clearLineOfSight returns true for adjacent squares", t => {
+test("hasClearLineOfSight returns true for adjacent squares", t => {
     const board = new Board();
-    t.true(board.clearLineOfSight([3, 0], [4, 0]));
-    t.true(board.clearLineOfSight([6, 1], [5, 0]));
-    t.true(board.clearLineOfSight([0, 6], [0, 7]));
+    t.true(board.hasClearLineOfSight([3, 0], [4, 0]));
+    t.true(board.hasClearLineOfSight([6, 1], [5, 0]));
+    t.true(board.hasClearLineOfSight([0, 6], [0, 7]));
 });
 
-test("clearLineOfSight returns true when all intermediate squares are empty", t => {
+test("hasClearLineOfSight returns true when all intermediate squares are empty", t => {
     const board = new Board();
-    t.true(board.clearLineOfSight([6, 1], [1, 6]));
+    t.true(board.hasClearLineOfSight([6, 1], [1, 6]));
 });
 
-test("clearLineOfSight returns false when one or more intermediate square is not empty", t => {
+test("hasClearLineOfSight returns false when one or more intermediate square is not empty", t => {
     const board = new Board();
-    t.false(board.clearLineOfSight([4, 1], [4, 7]));
-    t.false(board.clearLineOfSight([3, 7], [6, 7]));
+    t.false(board.hasClearLineOfSight([4, 1], [4, 7]));
+    t.false(board.hasClearLineOfSight([3, 7], [6, 7]));
 });
 
 test("place adds piece to square", t => {
