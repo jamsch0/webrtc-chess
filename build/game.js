@@ -13,12 +13,13 @@ export default class Game {
     get board() {
         return this.#board;
     }
-    #state = { currentTurn: "white", moveCount: 0 };
+    #state;
     get state() {
         return this.#state;
     }
     #eventListening = new AbortController();
-    constructor() {
+    constructor(player) {
+        this.#state = { player, currentTurn: "white", moveCount: 0 };
         dispatcher.addEventListener("squareselected", event => this.#onSquareSelected(event), { signal: this.#eventListening.signal });
     }
     destroy() {
@@ -98,6 +99,9 @@ export default class Game {
         return false;
     }
     #onSquareSelected(event) {
+        if (this.#state.currentTurn !== this.#state.player) {
+            return;
+        }
         const from = this.#state.selectedSquare;
         if (from === undefined) {
             this.#state.selectedSquare = event.detail.pos;
