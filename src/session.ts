@@ -6,19 +6,14 @@ import { Colour } from "./piece.js";
 export default class Session {
     #channel: RTCDataChannel;
 
-    #game: Game = new Game();
+    #game: Game;
     get game(): Readonly<Game> {
         return this.#game;
     }
 
-    #player: Colour;
-    get player() {
-        return this.#player;
-    }
-
     constructor(channel: RTCDataChannel, player: Colour) {
         this.#channel = channel;
-        this.#player = player;
+        this.#game = new Game(player);
 
         this.#channel.addEventListener("open", () => console.info("Session established"))
         this.#channel.addEventListener("close", () => console.info("Session terminated"));
@@ -32,7 +27,7 @@ export default class Session {
 
     #onMessage(event: MessageEvent): void {
         const message: Message = JSON.parse(event.data);
-        console.log(`${this.#player}: received message`, new Date().toISOString(), message);
+        console.log(`${this.#game.state.player}: received message`, new Date().toISOString(), message);
 
         switch (message.type) {
             case "move":
@@ -48,7 +43,7 @@ export default class Session {
     }
 
     #sendMessage(message: Message): void {
-        console.log(`${this.#player}: sending message`, new Date().toISOString(), message);
+        console.log(`${this.#game.state.player}: sending message`, new Date().toISOString(), message);
         this.#channel.send(JSON.stringify(message));
     }
 }

@@ -3,10 +3,10 @@ import dispatcher from "./dispatcher.js";
 import Piece, { Colour } from "./piece.js";
 
 export interface PieceMovedEvent {
-    readonly game: Game,
-    readonly from: Coord,
-    readonly to: Coord,
-    readonly moveCount: number,
+    readonly game: Game;
+    readonly from: Coord;
+    readonly to: Coord;
+    readonly moveCount: number;
 }
 
 export interface SquareSelectedEvent {
@@ -21,6 +21,7 @@ declare global {
 }
 
 interface GameState {
+    readonly player: Colour;
     currentTurn: Colour;
     moveCount: number;
     inCheck?: Colour;
@@ -41,14 +42,16 @@ export default class Game {
         return this.#board;
     }
 
-    #state: GameState = { currentTurn: "white", moveCount: 0 };
+    #state: GameState;
     get state(): Readonly<GameState> {
         return this.#state;
     }
 
     #eventListening = new AbortController();
 
-    constructor() {
+    constructor(player: Colour) {
+        this.#state = { player, currentTurn: "white", moveCount: 0 };
+
         dispatcher.addEventListener(
             "squareselected",
             event => this.#onSquareSelected(event),
@@ -156,6 +159,10 @@ export default class Game {
     }
 
     #onSquareSelected(event: CustomEvent<SquareSelectedEvent>): void {
+        if (this.#state.currentTurn !== this.#state.player) {
+            return;
+        }
+
         const from = this.#state.selectedSquare;
         if (from === undefined) {
             this.#state.selectedSquare = event.detail.pos;

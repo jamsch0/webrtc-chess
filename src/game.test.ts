@@ -3,11 +3,15 @@ import dispatcher from "./dispatcher.js";
 import Game, { SquareSelectedEvent } from "./game.js";
 
 const test = _test as TestFn<Game>;
-test.beforeEach(t => t.context = new Game());
+test.beforeEach(t => t.context = new Game("white"));
 test.afterEach(t => t.context.destroy());
 
 test("is created with correct starting state", t => {
-    t.is(t.context.state.currentTurn, "white");
+    t.deepEqual(t.context.state, {
+        player: "white",
+        currentTurn: "white",
+        moveCount: 0,
+    });
 });
 
 test("move throws error when origin square is empty", t => {
@@ -127,6 +131,15 @@ test.serial("squareselected event unselects square when attempting invalid move"
     dispatcher.dispatchEvent(new CustomEvent("squareselected", { detail }));
 
     detail = { pos: [1, 5] };
+    dispatcher.dispatchEvent(new CustomEvent("squareselected", { detail }));
+    t.is(t.context.state.selectedSquare, undefined);
+});
+
+test.serial("squareselected event is ignored when it is not player's turn", t => {
+    t.context.move([4, 1], [4, 2]);
+    t.not(t.context.state.currentTurn, t.context.state.player);
+
+    const detail: SquareSelectedEvent = { pos: [2, 7] };
     dispatcher.dispatchEvent(new CustomEvent("squareselected", { detail }));
     t.is(t.context.state.selectedSquare, undefined);
 });
