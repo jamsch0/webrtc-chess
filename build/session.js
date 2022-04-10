@@ -32,8 +32,8 @@ export default class Session {
                 }
                 break;
             case "promote":
-                if (coordsEqual(this.#game.state.promotingPawn, message.pos)) {
-                    this.#game.promotePawn(message.to);
+                if (coordsEqual(this.#game.state.promoting, message.pos)) {
+                    this.#game.promote(message.to);
                 }
                 break;
             default:
