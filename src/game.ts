@@ -32,7 +32,7 @@ interface GameState {
     currentTurn: Colour;
     moveCount: number;
     inCheck?: Colour;
-    promotingPawn?: Coord;
+    promoting?: Coord;
     selectedSquare?: Coord;
 }
 
@@ -72,8 +72,8 @@ export default class Game {
     }
 
     move(from: Coord, to: Coord): void {
-        if (this.#state.promotingPawn !== undefined) {
-            throw new Error("Cannot move while pawn promotion is in progress");
+        if (this.#state.promoting !== undefined) {
+            throw new Error("Cannot move while promotion is in progress");
         }
 
         const piece = this.#board.get(from);
@@ -107,7 +107,7 @@ export default class Game {
         }
 
         if (piece.type === "pawn" && to[1] === (piece.colour === "white" ? 7 : 0)) {
-            this.#state.promotingPawn = to;
+            this.#state.promoting = to;
         } else {
             this.#state.currentTurn = this.#state.currentTurn === "white" ? "black" : "white";
         }
@@ -119,21 +119,21 @@ export default class Game {
         dispatcher.dispatchEvent(new CustomEvent("piecemoved", { detail }));
     }
 
-    promotePawn(type: PieceType): void {
-        const pos = this.#state.promotingPawn;
+    promote(type: PieceType): void {
+        const pos = this.#state.promoting;
         if (pos === undefined) {
-            throw new Error("Pawn promotion is not in progress");
+            throw new Error("Promotion is not in progress");
         }
 
-        if (type === "king") {
-            throw new Error("Cannot promote pawn to a king");
+        if (type === "king" || type === "pawn") {
+            throw new Error(`Cannot promote to a ${type}`);
         }
 
         this.#board.remove(pos);
         this.#board.place({ colour: this.#state.currentTurn, type, hasMoved: true }, pos);
 
         this.#state.currentTurn = this.#state.currentTurn === "white" ? "black" : "white";
-        this.#state.promotingPawn = undefined;
+        this.#state.promoting = undefined;
 
         const detail: PawnPromotedEvent = { game: this, pos, type };
         dispatcher.dispatchEvent(new CustomEvent("pawnpromoted", { detail }));
