@@ -72,3 +72,11 @@ body {
     padding: 0.5vmin;
     opacity: 50%;
 }
+
+#game-board.rotate {
+    transform: rotate(0.5turn);
+}
+
+#game-board.rotate .square {
+    transform: rotate(0.5turn);
+}

@@ -8,7 +8,7 @@ const display = new Display();
     const channel = connection.createDataChannel("messages");
     const session = new Session(channel, "white");
     (globalThis as any).session = session;
-    display.render(session.game.board);
+    display.init(session.game);
 
     connection.addEventListener("icecandidate", event => {
         if (!event.candidate) {
@@ -30,7 +30,7 @@ const display = new Display();
     connection.addEventListener("datachannel", event => {
         const session = new Session(event.channel, "black");
         (globalThis as any).session = session;
-        display.render(session.game.board);
+        display.init(session.game);
     }, { once: true });
 
     connection.addEventListener("icecandidate", event => {
