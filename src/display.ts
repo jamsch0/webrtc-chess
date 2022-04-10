@@ -1,14 +1,20 @@
 import Board, { BOARD_SIZE, Coord, indexToCoord } from "./board.js";
 import dispatcher from "./dispatcher.js";
-import { SquareSelectedEvent } from "./game.js";
+import Game, { SquareSelectedEvent } from "./game.js";
 import { range } from "./iter.js";
+import { PieceType } from "./piece.js";
 
 export default class Display {
     #squares: HTMLElement[] = [];
 
     constructor() {
         this.#initBoard();
-        dispatcher.addEventListener("piecemoved", event => this.render(event.detail.game.board));
+
+        dispatcher.addEventListener("piecemoved", event => {
+            this.render(event.detail.game.board);
+            queueMicrotask(() => this.#showPawnPromotionPrompt(event.detail.game));
+        });
+
         dispatcher.addEventListener("pawnpromoted", event => this.render(event.detail.game.board));
     }
 
@@ -66,5 +72,18 @@ export default class Display {
 
         const detail: SquareSelectedEvent = { pos: [x, y] as Coord };
         dispatcher.dispatchEvent(new CustomEvent("squareselected", { detail }));
+    }
+
+    #showPawnPromotionPrompt(game: Game): void {
+        if (game.state.promotingPawn === undefined || game.state.currentTurn !== game.state.player) {
+            return;
+        }
+
+        let type: string | null = null;
+        do {
+            type = window.prompt("Enter type you wish to promote pawn to:", "pawn");
+        } while (type === null || !["queen", "bishop", "knight", "rook", "pawn"].includes(type.toLowerCase()));
+
+        game.promotePawn(type as PieceType);
     }
 }
