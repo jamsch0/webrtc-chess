@@ -1,3 +1,4 @@
+import { coordsEqual } from "./board.js";
 import dispatcher from "./dispatcher.js";
 import Game from "./game.js";
 export default class Session {
@@ -16,6 +17,10 @@ export default class Session {
             const { from, to, moveCount } = event.detail;
             this.#sendMessage({ type: "move", from, to, moveCount });
         });
+        dispatcher.addEventListener("pawnpromoted", event => {
+            const { pos, type: to } = event.detail;
+            this.#sendMessage({ type: "promote", pos, to });
+        });
     }
     #onMessage(event) {
         const message = JSON.parse(event.data);
@@ -24,6 +29,11 @@ export default class Session {
             case "move":
                 if (message.moveCount > this.#game.state.moveCount) {
                     this.#game.move(message.from, message.to);
+                }
+                break;
+            case "promote":
+                if (coordsEqual(this.#game.state.promotingPawn, message.pos)) {
+                    this.#game.promotePawn(message.to);
                 }
                 break;
             default:

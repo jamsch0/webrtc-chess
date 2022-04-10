@@ -26,6 +26,9 @@ export default class Game {
         this.#eventListening.abort();
     }
     move(from, to) {
+        if (this.#state.promotingPawn !== undefined) {
+            throw new Error("Cannot move while pawn promotion is in progress");
+        }
         const piece = this.#board.get(from);
         if (piece?.colour !== this.#state.currentTurn) {
             throw new Error(`Cannot move piece at [${from}]`);
@@ -49,11 +52,31 @@ export default class Game {
             }
             throw new Error("Cannot end turn with king in check");
         }
-        this.#state.currentTurn = this.#state.currentTurn === "white" ? "black" : "white";
+        if (piece.type === "pawn" && to[1] === (piece.colour === "white" ? 7 : 0)) {
+            this.#state.promotingPawn = to;
+        }
+        else {
+            this.#state.currentTurn = this.#state.currentTurn === "white" ? "black" : "white";
+        }
         this.#state.moveCount += 1;
         this.#state.inCheck = this.#isKingInCheck(this.#state.currentTurn) ? this.#state.currentTurn : undefined;
         const detail = { game: this, from, to, moveCount: this.#state.moveCount };
         dispatcher.dispatchEvent(new CustomEvent("piecemoved", { detail }));
+    }
+    promotePawn(type) {
+        const pos = this.#state.promotingPawn;
+        if (pos === undefined) {
+            throw new Error("Pawn promotion is not in progress");
+        }
+        if (type === "king") {
+            throw new Error("Cannot promote pawn to a king");
+        }
+        this.#board.remove(pos);
+        this.#board.place({ colour: this.#state.currentTurn, type, hasMoved: true }, pos);
+        this.#state.currentTurn = this.#state.currentTurn === "white" ? "black" : "white";
+        this.#state.promotingPawn = undefined;
+        const detail = { game: this, pos, type };
+        dispatcher.dispatchEvent(new CustomEvent("pawnpromoted", { detail }));
     }
     #isValidPieceMovement(from, to, piece, isCapturingPiece) {
         const fileDiff = to[0] - from[0];

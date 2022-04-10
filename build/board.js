@@ -1,5 +1,16 @@
 import { range, repeat, zip } from "./iter.js";
 export const BOARD_SIZE = 8;
+export function coordsEqual(a, b) {
+    if (a === b) {
+        return true;
+    }
+    else if (a === undefined || b === undefined) {
+        return false;
+    }
+    else {
+        return a[0] === b[0] && a[1] === b[1];
+    }
+}
 export function coordToIndex(pos) {
     return (pos[1] * BOARD_SIZE) + pos[0];
 }

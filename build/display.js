@@ -6,6 +6,7 @@ export default class Display {
     constructor() {
         this.#initBoard();
         dispatcher.addEventListener("piecemoved", event => this.render(event.detail.game.board));
+        dispatcher.addEventListener("pawnpromoted", event => this.render(event.detail.game.board));
     }
     #initBoard() {
         const board = document.getElementById("game-board");
