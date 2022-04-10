@@ -1,7 +1,7 @@
-import { Coord } from "./board.js";
+import { Coord, coordsEqual } from "./board.js";
 import dispatcher from "./dispatcher.js";
 import Game from "./game.js";
-import { Colour } from "./piece.js";
+import { Colour, PieceType } from "./piece.js";
 
 export default class Session {
     #channel: RTCDataChannel;
@@ -23,6 +23,11 @@ export default class Session {
             const { from, to, moveCount } = event.detail;
             this.#sendMessage({ type: "move", from, to, moveCount });
         });
+
+        dispatcher.addEventListener("pawnpromoted", event => {
+            const { pos, type: to } = event.detail;
+            this.#sendMessage({ type: "promote", pos, to });
+        });
     }
 
     #onMessage(event: MessageEvent): void {
@@ -33,6 +38,12 @@ export default class Session {
             case "move":
                 if (message.moveCount > this.#game.state.moveCount) {
                     this.#game.move(message.from, message.to);
+                }
+                break;
+
+            case "promote":
+                if (coordsEqual(this.#game.state.promotingPawn, message.pos)) {
+                    this.#game.promotePawn(message.to);
                 }
                 break;
 
@@ -49,4 +60,5 @@ export default class Session {
 }
 
 export type Message =
-    | { type: "move", from: Coord, to: Coord, moveCount: number };
+    | { type: "move", from: Coord, to: Coord, moveCount: number }
+    | { type: "promote", pos: Coord, to: PieceType };

@@ -1,6 +1,12 @@
 import Board, { Coord, indexToCoord } from "./board.js";
 import dispatcher from "./dispatcher.js";
-import Piece, { Colour } from "./piece.js";
+import Piece, { Colour, PieceType } from "./piece.js";
+
+export interface PawnPromotedEvent {
+    readonly game: Game;
+    readonly pos: Coord;
+    readonly type: PieceType;
+}
 
 export interface PieceMovedEvent {
     readonly game: Game;
@@ -15,6 +21,7 @@ export interface SquareSelectedEvent {
 
 declare global {
     interface DispatcherEventMap {
+        "pawnpromoted": PawnPromotedEvent;
         "piecemoved": PieceMovedEvent;
         "squareselected": SquareSelectedEvent;
     }
@@ -25,6 +32,7 @@ interface GameState {
     currentTurn: Colour;
     moveCount: number;
     inCheck?: Colour;
+    promotingPawn?: Coord;
     selectedSquare?: Coord;
 }
 
@@ -64,6 +72,10 @@ export default class Game {
     }
 
     move(from: Coord, to: Coord): void {
+        if (this.#state.promotingPawn !== undefined) {
+            throw new Error("Cannot move while pawn promotion is in progress");
+        }
+
         const piece = this.#board.get(from);
         if (piece?.colour !== this.#state.currentTurn) {
             throw new Error(`Cannot move piece at [${from}]`);
@@ -94,12 +106,37 @@ export default class Game {
             throw new Error("Cannot end turn with king in check");
         }
 
-        this.#state.currentTurn = this.#state.currentTurn === "white" ? "black" : "white";
+        if (piece.type === "pawn" && to[1] === (piece.colour === "white" ? 7 : 0)) {
+            this.#state.promotingPawn = to;
+        } else {
+            this.#state.currentTurn = this.#state.currentTurn === "white" ? "black" : "white";
+        }
+
         this.#state.moveCount += 1;
         this.#state.inCheck = this.#isKingInCheck(this.#state.currentTurn) ? this.#state.currentTurn : undefined;
 
         const detail: PieceMovedEvent = { game: this, from, to, moveCount: this.#state.moveCount };
         dispatcher.dispatchEvent(new CustomEvent("piecemoved", { detail }));
+    }
+
+    promotePawn(type: PieceType): void {
+        const pos = this.#state.promotingPawn;
+        if (pos === undefined) {
+            throw new Error("Pawn promotion is not in progress");
+        }
+
+        if (type === "king") {
+            throw new Error("Cannot promote pawn to a king");
+        }
+
+        this.#board.remove(pos);
+        this.#board.place({ colour: this.#state.currentTurn, type, hasMoved: true }, pos);
+
+        this.#state.currentTurn = this.#state.currentTurn === "white" ? "black" : "white";
+        this.#state.promotingPawn = undefined;
+
+        const detail: PawnPromotedEvent = { game: this, pos, type };
+        dispatcher.dispatchEvent(new CustomEvent("pawnpromoted", { detail }));
     }
 
     #isValidPieceMovement(from: Coord, to: Coord, piece: Piece, isCapturingPiece: boolean): boolean {

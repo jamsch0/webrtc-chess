@@ -6,6 +6,16 @@ export const BOARD_SIZE = 8;
 type CoordElem = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export type Coord = readonly [CoordElem, CoordElem];
 
+export function coordsEqual(a: Coord | undefined, b: Coord | undefined): boolean {
+    if (a === b) {
+        return true;
+    } else if (a === undefined || b === undefined) {
+        return false;
+    } else {
+        return a[0] === b[0] && a[1] === b[1];
+    }
+}
+
 export function coordToIndex(pos: Coord): number {
     return (pos[1] * BOARD_SIZE) + pos[0];
 }

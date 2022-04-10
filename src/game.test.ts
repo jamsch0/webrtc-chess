@@ -52,6 +52,16 @@ test("move throws error when king ends turn in check", t => {
     t.notThrows(() => t.context.move([4, 5], [4, 4]));
 });
 
+test("move throws error when pawn promotion is in progress", t => {
+    t.context.board.move([0, 6], [0, 4]);
+    t.context.board.move([0, 7], [0, 5]);
+    t.context.board.move([0, 1], [0, 6]);
+    t.context.move([0, 6], [0, 7]);
+    t.not(t.context.state.promotingPawn, undefined);
+
+    t.throws(() => t.context.move([4, 6], [4, 5]), { message: "Cannot move while pawn promotion is in progress" });
+});
+
 test("move updates piece position and swaps current player", t => {
     let piece = t.context.board.get([3, 1]);
     t.context.move([3, 1], [3, 3]);
@@ -65,6 +75,18 @@ test("move updates piece position and swaps current player", t => {
     t.is(t.context.board.get([3, 3]), piece);
     t.is(t.context.board.get([3, 5]), undefined);
     t.is(t.context.state.currentTurn, "white");
+});
+
+test("move does not swap current player when pawn promotion triggered", t => {
+    t.context.board.move([0, 6], [0, 4]);
+    t.context.board.move([0, 7], [0, 5]);
+    t.context.board.move([0, 1], [0, 6]);
+    t.is(t.context.state.currentTurn, "white");
+    t.is(t.context.state.promotingPawn, undefined);
+
+    t.context.move([0, 6], [0, 7]);
+    t.is(t.context.state.currentTurn, "white");
+    t.deepEqual(t.context.state.promotingPawn, [0, 7]);
 });
 
 test("move updates in check when piece directly checks opponent king", t => {
@@ -96,6 +118,8 @@ test("move updates in check when piece causes discovered check of opponent king"
 });
 
 test.serial("move updates move count and dispatches piecemoved event", t => {
+    t.plan(5);
+
     dispatcher.addEventListener("piecemoved", event => {
         t.is(event.detail.game, t.context);
         t.is(event.detail.moveCount, 1);
@@ -105,6 +129,40 @@ test.serial("move updates move count and dispatches piecemoved event", t => {
 
     t.context.move([3, 1], [3, 3]);
     t.is(t.context.state.moveCount, 1);
+});
+
+test("promotePawn throws error when promotion is not in progress", t => {
+    t.throws(() => t.context.promotePawn("queen"), { message: "Pawn promotion is not in progress" });
+});
+
+test("promotePawn throws error when type is king", t => {
+    t.context.board.move([0, 6], [0, 4]);
+    t.context.board.move([0, 7], [0, 5]);
+    t.context.board.move([0, 1], [0, 6]);
+    t.context.move([0, 6], [0, 7]);
+
+    t.throws(() => t.context.promotePawn("king"), { message: "Cannot promote pawn to a king" });
+});
+
+test.serial("promotePawn updates piece type and current player and dispatches pawnpromoted event", t => {
+    t.plan(6);
+
+    dispatcher.addEventListener("pawnpromoted", event => {
+        t.is(event.detail.game, t.context);
+        t.deepEqual(event.detail.pos, [0, 7]);
+        t.is(event.detail.type, "bishop");
+    }, { once: true });
+
+    t.context.board.move([0, 6], [0, 4]);
+    t.context.board.move([0, 7], [0, 5]);
+    t.context.board.move([0, 1], [0, 6]);
+    t.context.move([0, 6], [0, 7]);
+
+    const piece = t.context.board.get([0, 7]);
+    t.context.promotePawn("bishop");
+    t.is(t.context.state.currentTurn, "black");
+    t.is(t.context.state.promotingPawn, undefined);
+    t.deepEqual(t.context.board.get([0, 7]), { ...piece, type: "bishop" });
 });
 
 test.serial("squareselected event selects square", t => {
