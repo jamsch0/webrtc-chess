@@ -5,7 +5,10 @@ export default class Display {
     #squares = [];
     constructor() {
         this.#initBoard();
-        dispatcher.addEventListener("piecemoved", event => this.render(event.detail.game.board));
+        dispatcher.addEventListener("piecemoved", event => {
+            this.render(event.detail.game.board);
+            queueMicrotask(() => this.#showPawnPromotionPrompt(event.detail.game));
+        });
         dispatcher.addEventListener("pawnpromoted", event => this.render(event.detail.game.board));
     }
     #initBoard() {
@@ -49,5 +52,15 @@ export default class Display {
         const y = Math.floor((target.clientHeight - relativeY) / squareHeight);
         const detail = { pos: [x, y] };
         dispatcher.dispatchEvent(new CustomEvent("squareselected", { detail }));
+    }
+    #showPawnPromotionPrompt(game) {
+        if (game.state.promotingPawn === undefined || game.state.currentTurn !== game.state.player) {
+            return;
+        }
+        let type = null;
+        do {
+            type = window.prompt("Enter type you wish to promote pawn to:", "pawn");
+        } while (type === null || !["queen", "bishop", "knight", "rook", "pawn"].includes(type.toLowerCase()));
+        game.promotePawn(type);
     }
 }
