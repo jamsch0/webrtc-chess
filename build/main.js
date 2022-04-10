@@ -6,7 +6,7 @@ globalThis.hostGame = async () => {
     const channel = connection.createDataChannel("messages");
     const session = new Session(channel, "white");
     globalThis.session = session;
-    display.render(session.game.board);
+    display.init(session.game);
     connection.addEventListener("icecandidate", event => {
         if (!event.candidate) {
             console.log("offer:", btoa(JSON.stringify(connection.localDescription)));
@@ -24,7 +24,7 @@ globalThis.joinGame = async (offer) => {
     connection.addEventListener("datachannel", event => {
         const session = new Session(event.channel, "black");
         globalThis.session = session;
-        display.render(session.game.board);
+        display.init(session.game);
     }, { once: true });
     connection.addEventListener("icecandidate", event => {
         if (!event.candidate) {
