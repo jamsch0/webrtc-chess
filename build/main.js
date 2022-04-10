@@ -1,6 +1,15 @@
 import Session from "./session.js";
 import Display from "./display.js";
-const connection = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.stunprotocol.org" }] });
+const connection = new RTCPeerConnection({
+    iceServers: [
+        { urls: "stun:openrelay.metered.ca:80" },
+        {
+            urls: "turn:openrelay.metered.ca:80",
+            credential: "openrelayproject",
+            username: "openrelayproject",
+        }
+    ],
+});
 const display = new Display();
 globalThis.hostGame = async () => {
     const channel = connection.createDataChannel("messages");
