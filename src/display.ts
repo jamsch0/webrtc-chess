@@ -90,10 +90,10 @@ export default class Display {
             return;
         }
 
-        let type: string | null = null;
+        let type: string | undefined;
         do {
-            type = window.prompt("Enter type you wish to promote to:", "queen");
-        } while (type === null || !["queen", "bishop", "knight", "rook"].includes(type.toLowerCase()));
+            type = window.prompt("Enter type you wish to promote to:", "queen")?.toLowerCase();
+        } while (type === undefined || !["queen", "bishop", "knight", "rook"].includes(type));
 
         game.promote(type as PieceType);
     }
