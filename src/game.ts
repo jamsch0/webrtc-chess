@@ -1,4 +1,4 @@
-import Board, { Coord, indexToCoord } from "./board.js";
+import Board, { BOARD_SIZE, Coord, indexToCoord } from "./board.js";
 import dispatcher from "./dispatcher.js";
 import Piece, { Colour, PieceType } from "./piece.js";
 
@@ -106,14 +106,13 @@ export default class Game {
             throw new Error("Cannot end turn with king in check");
         }
 
-        if (piece.type === "pawn" && to[1] === (piece.colour === "white" ? 7 : 0)) {
+        if (piece.type === "pawn" && to[1] === (piece.colour === "white" ? BOARD_SIZE - 1 : 0)) {
             this.#state.promoting = to;
         } else {
-            this.#state.currentTurn = this.#state.currentTurn === "white" ? "black" : "white";
+            this.#endTurn();
         }
 
         this.#state.moveCount += 1;
-        this.#state.inCheck = this.#isKingInCheck(this.#state.currentTurn) ? this.#state.currentTurn : undefined;
 
         const detail: PieceMovedEvent = { game: this, from, to, moveCount: this.#state.moveCount };
         dispatcher.dispatchEvent(new CustomEvent("piecemoved", { detail }));
@@ -132,11 +131,16 @@ export default class Game {
         this.#board.remove(pos);
         this.#board.place({ colour: this.#state.currentTurn, type, hasMoved: true }, pos);
 
-        this.#state.currentTurn = this.#state.currentTurn === "white" ? "black" : "white";
+        this.#endTurn();
         this.#state.promoting = undefined;
 
         const detail: PawnPromotedEvent = { game: this, pos, type };
         dispatcher.dispatchEvent(new CustomEvent("pawnpromoted", { detail }));
+    }
+
+    #endTurn(): void {
+        this.#state.currentTurn = this.#state.currentTurn === "white" ? "black" : "white";
+        this.#state.inCheck = this.#isKingInCheck(this.#state.currentTurn) ? this.#state.currentTurn : undefined;
     }
 
     #isValidPieceMovement(from: Coord, to: Coord, piece: Piece, isCapturingPiece: boolean): boolean {

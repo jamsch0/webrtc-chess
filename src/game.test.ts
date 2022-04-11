@@ -154,7 +154,7 @@ test("promote throws error when type is pawn", t => {
 });
 
 test.serial("promote updates piece type and current player and dispatches pawnpromoted event", t => {
-    t.plan(6);
+    t.plan(7);
 
     dispatcher.addEventListener("pawnpromoted", event => {
         t.is(event.detail.game, t.context);
@@ -166,12 +166,24 @@ test.serial("promote updates piece type and current player and dispatches pawnpr
     t.context.board.move([0, 7], [0, 5]);
     t.context.board.move([0, 1], [0, 6]);
     t.context.move([0, 6], [0, 7]);
+    t.is(t.context.state.currentTurn, "white");
 
     const piece = t.context.board.get([0, 7]);
     t.context.promote("bishop");
     t.is(t.context.state.currentTurn, "black");
     t.is(t.context.state.promoting, undefined);
     t.deepEqual(t.context.board.get([0, 7]), { ...piece, type: "bishop" });
+});
+
+test("promote updates in check when piece directly checks opponent king", t => {
+    t.context.board.remove([3, 7]);
+    t.context.board.remove([1, 6]);
+    t.context.board.move([0, 1], [1, 6]);
+    t.context.move([1, 6], [2, 7]);
+    t.is(t.context.state.inCheck, undefined);
+
+    t.context.promote("rook");
+    t.is(t.context.state.inCheck, "black");
 });
 
 test.serial("squareselected event selects square", t => {
