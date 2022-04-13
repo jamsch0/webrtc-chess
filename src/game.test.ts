@@ -131,6 +131,80 @@ test.serial("move updates move count and dispatches piecemoved event", t => {
     t.is(t.context.state.moveCount, 1);
 });
 
+test("move castles kingside", t => {
+    t.context.board.remove([5, 0]);
+    t.context.board.remove([6, 0]);
+
+    const king = t.context.board.get([4, 0]);
+    const rook = t.context.board.get([7, 0]);
+
+    t.context.move([4, 0], [6, 0]);
+    t.is(t.context.board.get([6, 0]), king);
+    t.is(t.context.board.get([5, 0]), rook);
+});
+
+test("move castles queenside", t => {
+    t.context.board.remove([1, 0]);
+    t.context.board.remove([2, 0]);
+    t.context.board.remove([3, 0]);
+
+    const king = t.context.board.get([4, 0]);
+    const rook = t.context.board.get([0, 0]);
+
+    t.context.move([4, 0], [1, 0]);
+    t.is(t.context.board.get([1, 0]), king);
+    t.is(t.context.board.get([2, 0]), rook);
+});
+
+test("move does not castle when king has moved", t => {
+    t.context.board.remove([5, 0]);
+    t.context.board.remove([6, 0]);
+
+    const king = t.context.board.get([4, 0])!;
+    king.hasMoved = true;
+
+    t.throws(() => t.context.move([4, 0], [6, 0]), { message: "Cannot move king from [4,0] to [6,0]" });
+});
+
+test("move does not castle when rook has moved", t => {
+    t.context.board.remove([1, 0]);
+    t.context.board.remove([2, 0]);
+    t.context.board.remove([3, 0]);
+
+    const rook = t.context.board.get([0, 0])!;
+    rook.hasMoved = true;
+
+    t.throws(() => t.context.move([4, 0], [1, 0]), { message: "Cannot move king from [4,0] to [1,0]" });
+});
+
+test("move does not castle when one or more square between king and rook is not empty", t => {
+    t.context.board.remove([1, 0]);
+    t.context.board.remove([3, 0]);
+
+    t.throws(() => t.context.move([4, 0], [1, 0]), { message: "Cannot move king from [4,0] to [1,0]" });
+});
+
+test("move does not castle when one or more square between king and rook is under attack", t => {
+    t.context.board.remove([1, 7]);
+    t.context.board.remove([2, 7]);
+    t.context.board.remove([3, 7]);
+    t.context.board.move([4, 1], [4, 2]);
+    t.context.board.move([1, 6], [1, 5]);
+    t.context.move([5, 0], [0, 5]);
+
+    t.throws(() => t.context.move([4, 7], [1, 7]), { message: "Cannot castle with [2,7] under attack" });
+});
+
+test("move does not castle when king is in check", t => {
+    t.context.board.remove([5, 7]);
+    t.context.board.remove([6, 7]);
+    t.context.board.move([2, 1], [2, 2]);
+    t.context.board.move([3, 6], [3, 5]);
+    t.context.move([3, 0], [0, 3]);
+
+    t.throws(() => t.context.move([4, 7], [6, 7]), { message: "Cannot castle with king in check" });
+});
+
 test("promote throws error when promotion is not in progress", t => {
     t.throws(() => t.context.promote("queen"), { message: "Promotion is not in progress" });
 });

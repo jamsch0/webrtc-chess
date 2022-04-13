@@ -1,5 +1,6 @@
 import Board, { BOARD_SIZE, Coord, indexToCoord } from "./board.js";
 import dispatcher from "./dispatcher.js";
+import { range } from "./iter.js";
 import Piece, { Colour, PieceType } from "./piece.js";
 
 export interface PawnPromotedEvent {
@@ -81,29 +82,62 @@ export default class Game {
             throw new Error(`Cannot move piece at [${from}]`);
         }
 
-        const targetPiece = this.#board.get(to);
-        if (targetPiece?.colour === this.#state.currentTurn || targetPiece?.type === "king") {
-            throw new Error(`Cannot capture piece at [${to}]`);
+        let isCastling = false;
+        if (piece.type === "king" && !piece.hasMoved) {
+            const dir = Math.sign(to[0] - from[0]);
+            const rookPos = [to[0] + dir, to[1]] as Coord;
+            const rook = this.#board.get(rookPos);
+
+            if (rook?.type === "rook"
+                && rook.colour === piece.colour
+                && !rook.hasMoved
+                && this.#board.hasClearLineOfSight(from, rookPos)
+            ) {
+                if (this.#state.inCheck === piece.colour) {
+                    throw new Error("Cannot castle with king in check");
+                }
+
+                const rank = to[1];
+                for (const file of range(from[0], to[0])) {
+                    const to = [file + dir, rank] as Coord;
+                    this.#board.move([file, rank] as Coord, to);
+
+                    if (this.#isKingInCheck(this.#state.currentTurn)) {
+                        this.#board.move(to, from);
+                        throw new Error(`Cannot castle with [${to}] under attack`);
+                    }
+                }
+
+                this.#board.move(rookPos, [to[0] - dir, to[1]] as Coord);
+                isCastling = true;
+            }
         }
 
-        if (!this.#isValidPieceMovement(from, to, piece, targetPiece !== undefined)) {
-            throw new Error(`Cannot move ${piece.type} from [${from}] to [${to}]`);
-        }
-
-        if (piece.type !== "knight" && !this.#board.hasClearLineOfSight(from, to)) {
-            throw new Error(`Move from [${from}] to [${to}] obstructed`);
-        }
-
-        this.#board.remove(to);
-        this.#board.move(from, to);
-
-        if (this.#isKingInCheck(this.#state.currentTurn)) {
-            this.#board.move(to, from);
-            if (targetPiece !== undefined) {
-                this.#board.place(targetPiece, to);
+        if (!isCastling) {
+            const targetPiece = this.#board.get(to);
+            if (targetPiece?.colour === this.#state.currentTurn || targetPiece?.type === "king") {
+                throw new Error(`Cannot capture piece at [${to}]`);
             }
 
-            throw new Error("Cannot end turn with king in check");
+            if (!this.#isValidPieceMovement(from, to, piece, targetPiece !== undefined)) {
+                throw new Error(`Cannot move ${piece.type} from [${from}] to [${to}]`);
+            }
+
+            if (piece.type !== "knight" && !this.#board.hasClearLineOfSight(from, to)) {
+                throw new Error(`Move from [${from}] to [${to}] obstructed`);
+            }
+
+            this.#board.remove(to);
+            this.#board.move(from, to);
+
+            if (this.#isKingInCheck(this.#state.currentTurn)) {
+                this.#board.move(to, from);
+                if (targetPiece !== undefined) {
+                    this.#board.place(targetPiece, to);
+                }
+
+                throw new Error("Cannot end turn with king in check");
+            }
         }
 
         if (piece.type === "pawn" && to[1] === (piece.colour === "white" ? BOARD_SIZE - 1 : 0)) {
