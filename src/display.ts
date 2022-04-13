@@ -10,10 +10,16 @@ export default class Display {
     constructor() {
         dispatcher.addEventListener("piecemoved", event => {
             this.render(event.detail.game.board);
-            queueMicrotask(() => this.#showPromotionPrompt(event.detail.game));
+            setTimeout(() => {
+                this.#showCheckAlert(event.detail.game);
+                this.#showPromotionPrompt(event.detail.game);
+            });
         });
 
-        dispatcher.addEventListener("pawnpromoted", event => this.render(event.detail.game.board));
+        dispatcher.addEventListener("pawnpromoted", event => {
+            this.render(event.detail.game.board);
+            setTimeout(() => this.#showCheckAlert(event.detail.game));
+        });
     }
 
     init(game: Readonly<Game>): void {
@@ -83,6 +89,12 @@ export default class Display {
 
         const detail: SquareSelectedEvent = { pos: [x, y] as Coord };
         dispatcher.dispatchEvent(new CustomEvent("squareselected", { detail }));
+    }
+
+    #showCheckAlert(game: Game): void {
+        if (game.state.inCheck === game.state.player) {
+            window.alert("Check!");
+        }
     }
 
     #showPromotionPrompt(game: Game): void {
