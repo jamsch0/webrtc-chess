@@ -6,9 +6,15 @@ export default class Display {
     constructor() {
         dispatcher.addEventListener("piecemoved", event => {
             this.render(event.detail.game.board);
-            queueMicrotask(() => this.#showPromotionPrompt(event.detail.game));
+            setTimeout(() => {
+                this.#showCheckAlert(event.detail.game);
+                this.#showPromotionPrompt(event.detail.game);
+            });
         });
-        dispatcher.addEventListener("pawnpromoted", event => this.render(event.detail.game.board));
+        dispatcher.addEventListener("pawnpromoted", event => {
+            this.render(event.detail.game.board);
+            setTimeout(() => this.#showCheckAlert(event.detail.game));
+        });
     }
     init(game) {
         const board = document.getElementById("game-board");
@@ -64,14 +70,19 @@ export default class Display {
         const detail = { pos: [x, y] };
         dispatcher.dispatchEvent(new CustomEvent("squareselected", { detail }));
     }
+    #showCheckAlert(game) {
+        if (game.state.inCheck === game.state.player) {
+            window.alert("Check!");
+        }
+    }
     #showPromotionPrompt(game) {
         if (game.state.promoting === undefined || game.state.currentTurn !== game.state.player) {
             return;
         }
-        let type = null;
+        let type;
         do {
-            type = window.prompt("Enter type you wish to promote to:", "queen");
-        } while (type === null || !["queen", "bishop", "knight", "rook"].includes(type.toLowerCase()));
+            type = window.prompt("Enter type you wish to promote to:", "queen")?.toLowerCase();
+        } while (type === undefined || !["queen", "bishop", "knight", "rook"].includes(type));
         game.promote(type);
     }
 }
