@@ -1,4 +1,4 @@
-import Board, { BOARD_SIZE, indexToCoord } from "./board.js";
+import Board, { BOARD_SIZE, coordsEqual, indexToCoord } from "./board.js";
 import dispatcher from "./dispatcher.js";
 import { range } from "./iter.js";
 /**
@@ -59,10 +59,16 @@ export default class Game {
                 isCastling = true;
             }
         }
+        let enPassant;
         if (!isCastling) {
-            const targetPiece = this.#board.get(to);
+            const rankDiff = to[1] - from[1];
+            const targetPos = piece.type === "pawn"
+                && coordsEqual(this.#state.enPassant, [to[0], to[1] - Math.sign(rankDiff)])
+                ? this.#state.enPassant
+                : to;
+            const targetPiece = this.#board.get(targetPos);
             if (targetPiece?.colour === this.#state.currentTurn || targetPiece?.type === "king") {
-                throw new Error(`Cannot capture piece at [${to}]`);
+                throw new Error(`Cannot capture piece at [${targetPos}]`);
             }
             if (!this.#isValidPieceMovement(from, to, piece, targetPiece !== undefined)) {
                 throw new Error(`Cannot move ${piece.type} from [${from}] to [${to}]`);
@@ -70,12 +76,15 @@ export default class Game {
             if (piece.type !== "knight" && !this.#board.hasClearLineOfSight(from, to)) {
                 throw new Error(`Move from [${from}] to [${to}] obstructed`);
             }
-            this.#board.remove(to);
+            if (piece.type === "pawn" && !piece.hasMoved && Math.abs(rankDiff) === 2) {
+                enPassant = to;
+            }
+            this.#board.remove(targetPos);
             this.#board.move(from, to);
             if (this.#isKingInCheck(this.#state.currentTurn)) {
                 this.#board.move(to, from);
                 if (targetPiece !== undefined) {
-                    this.#board.place(targetPiece, to);
+                    this.#board.place(targetPiece, targetPos);
                 }
                 throw new Error("Cannot end turn with king in check");
             }
@@ -87,6 +96,7 @@ export default class Game {
             this.#endTurn();
         }
         this.#state.moveCount += 1;
+        this.#state.enPassant = enPassant;
         const detail = { game: this, from, to, moveCount: this.#state.moveCount };
         dispatcher.dispatchEvent(new CustomEvent("piecemoved", { detail }));
     }
