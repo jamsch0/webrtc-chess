@@ -205,6 +205,38 @@ test("move does not castle when king is in check", t => {
     t.throws(() => t.context.move([4, 7], [6, 7]), { message: "Cannot castle with king in check" });
 });
 
+test("move allows capture en passant", t => {
+    t.context.board.move([1, 6], [1, 3]);
+
+    t.context.move([2, 1], [2, 3]);
+    t.deepEqual(t.context.state.enPassant, [2, 3]);
+
+    t.context.move([1, 3], [2, 2]);
+    t.is(t.context.board.get([2, 3]), undefined);
+    t.is(t.context.state.enPassant, undefined);
+});
+
+test("move does not allow capture en passant when target pawn does not advance 2 ranks in 1 move", t => {
+    t.context.board.move([1, 6], [1, 3]);
+    t.context.board.move([2, 1], [2, 2]);
+
+    t.context.move([2, 2], [2, 3]);
+    t.is(t.context.state.enPassant, undefined);
+    t.throws(() => t.context.move([1, 3], [2, 2]), { message: "Cannot move pawn from [1,3] to [2,2]" });
+});
+
+test("move does not allow capture en passant when not immediately after target pawn move", t => {
+    t.context.board.move([1, 6], [1, 3]);
+
+    t.context.move([2, 1], [2, 3]);
+    t.deepEqual(t.context.state.enPassant, [2, 3]);
+
+    t.context.move([6, 7], [5, 5]);
+    t.context.move([6, 0], [5, 2]);
+    t.is(t.context.state.enPassant, undefined);
+    t.throws(() => t.context.move([1, 3], [2, 2]), { message: "Cannot move pawn from [1,3] to [2,2]" });
+});
+
 test("promote throws error when promotion is not in progress", t => {
     t.throws(() => t.context.promote("queen"), { message: "Promotion is not in progress" });
 });
