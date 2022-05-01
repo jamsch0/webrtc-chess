@@ -33,6 +33,7 @@ jobs:
         path: |
           index.html
           style.css
+          assets/**/*.svg
           build/**/*.js
           !build/**/*.test.js
 
