@@ -37,18 +37,22 @@ export default class Display {
             position.classList.add("square-position");
             position.innerText = `[${pos[0]}, ${pos[1]}]`;
             square.appendChild(position);
-            const content = document.createElement("div");
-            content.classList.add("square-content");
-            this.#squares[index] = content;
-            square.appendChild(content);
+            const piece = document.createElement("div");
+            piece.classList.add("piece");
+            this.#squares[index] = piece;
+            square.appendChild(piece);
             board.prepend(square);
         }
         this.render(game.board);
     }
     render(board) {
         for (const index of range(0, this.#squares.length)) {
+            const elem = this.#squares[index];
+            elem.className = "piece";
             const piece = board.get(indexToCoord(index));
-            this.#squares[index].innerText = piece ? `${piece.type}\n${piece.colour}` : "";
+            if (piece !== undefined) {
+                elem.classList.add(`${piece.type}-${piece.colour}`);
+            }
         }
     }
     #onClick(event) {
