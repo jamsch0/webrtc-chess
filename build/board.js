@@ -109,4 +109,10 @@ export default class Board {
         this.place(piece, to);
         piece.hasMoved = true;
     }
+    load(squares) {
+        if (squares.length !== BOARD_SIZE ** 2) {
+            throw new Error("Cannot load board with invalid number of squares");
+        }
+        this.#squares = squares;
+    }
 }
