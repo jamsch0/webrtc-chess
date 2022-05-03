@@ -1,4 +1,5 @@
 import Board, { BOARD_SIZE, Coord, coordsEqual, indexToCoord } from "./board.js";
+import digest from "./digest.js";
 import dispatcher from "./dispatcher.js";
 import { range } from "./iter.js";
 import Piece, { Colour, PieceType } from "./piece.js";
@@ -37,6 +38,8 @@ interface GameState {
     enPassant?: Coord;
     selectedSquare?: Coord;
 }
+
+type SerialisableGameState = GameState & { board: (Piece | undefined)[] };
 
 /**
  * A game of chess.
@@ -267,7 +270,21 @@ export default class Game {
         }
     }
 
+    digest(): Promise<string> {
+        const sharedState = { ...this.#state, player: undefined, board: this.#board.squares };
+        return digest(JSON.stringify(sharedState));
+    }
+
+    load(json: string): void {
+        // TODO: Validate parsed state
+        const { board, ...state } = JSON.parse(json) as SerialisableGameState;
+
+        this.#board.load(board.map(square => square ?? undefined));
+        this.#state = state;
+    }
+
     toJSON(): string {
-        return JSON.stringify({ state: this.#state, board: this.#board.squares });
+        const state = { ...this.#state, board: this.#board.squares } as SerialisableGameState;
+        return JSON.stringify(state);
     }
 }

@@ -38,7 +38,7 @@ export function indexToCoord(index: number): Coord {
 export default class Board {
     #squares: (Piece | undefined)[];
 
-    get squares() {
+    get squares(): readonly (Piece | undefined)[] {
         return this.#squares;
     }
 
@@ -133,5 +133,13 @@ export default class Board {
         this.remove(from);
         this.place(piece, to);
         piece.hasMoved = true;
+    }
+
+    load(squares: (Piece | undefined)[]): void {
+        if (squares.length !== BOARD_SIZE ** 2) {
+            throw new Error("Cannot load board with invalid number of squares");
+        }
+
+        this.#squares = squares;
     }
 }

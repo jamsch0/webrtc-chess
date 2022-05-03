@@ -8,6 +8,8 @@ export default class Display {
     #squares: HTMLElement[] = [];
 
     constructor() {
+        dispatcher.addEventListener("sessionestablished", event => this.render(event.detail.session.game.board));
+
         dispatcher.addEventListener("piecemoved", event => {
             this.render(event.detail.game.board);
             setTimeout(() => {
