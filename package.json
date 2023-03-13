@@ -12,7 +12,7 @@
         "watch": "concurrently \"npm:build -- --watch\" \"npm:test -- --watch\" \"npm:start\""
     },
     "devDependencies": {
-        "@ava/typescript": "^3.0.1",
+        "@ava/typescript": "^4.0.0",
         "ava": "^5.2.0",
         "concurrently": "^7.6.0",
         "serve": "^14.2.0",
